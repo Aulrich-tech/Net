@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hands-On Exam — Network Practical</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&display=swap');
+
+  :root {
+    --bg: #0a0e14;
+    --surface: #0d1117;
+    --panel: #111820;
+    --border: #1e2d3d;
+    --accent: #00d4ff;
+    --accent2: #00ff88;
+    --accent3: #ff6b35;
+    --warn: #ffd93d;
+    --danger: #ff4757;
+    --text: #cdd6f4;
+    --muted: #6b7c93;
+    --router-color: #00d4ff;
+    --pc-color: #00ff88;
+    --link-color: #2a4a6b;
+    --link-active: #00d4ff44;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    flex: 1;
+  }
+  .back-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .submit-btn {
+    background: var(--accent2);
+    border: none;
+    color: #000;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+  .submit-btn:hover { background: #00ffaa; transform: translateY(-1px); }
+  .progress-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--warn);
+  }
+
+  /* LAYOUT */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    grid-template-rows: auto 1fr;
+    height: calc(100vh - 53px);
+  }
+
+  /* SCENARIO PANEL */
+  .scenario-panel {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    padding: 14px 20px;
+    grid-column: 1;
+  }
+  .scenario-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    color: var(--accent3);
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+  .scenario-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .scenario-text strong { color: var(--accent); }
+
+  /* TASK LIST PANEL */
+  .task-panel {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    grid-column: 2;
+    grid-row: 1;
+    overflow-y: auto;
+  }
+  .task-panel-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    color: var(--warn);
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+  }
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    min-width: 22px;
+    padding-top: 1px;
+  }
+  .task-check {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--muted);
+    border-radius: 3px;
+    min-width: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    margin-top: 2px;
+    transition: all 0.2s;
+  }
+  .task-check.done { border-color: var(--accent2); background: var(--accent2); color: #000; }
+
+  /* TOPOLOGY CANVAS */
+  .topology-area {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 20% 20%, #00d4ff08 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, #00ff8808 0%, transparent 50%),
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: auto, auto, 40px 40px, 40px 40px;
+    grid-column: 1;
+    grid-row: 2;
+    cursor: default;
+  }
+  .topology-canvas {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  /* DEVICE NODES */
+  .device-node {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.15s;
+    user-select: none;
+    z-index: 10;
+  }
+  .device-node:hover { transform: scale(1.08); }
+  .device-node.selected .device-icon { border-color: var(--warn) !important; box-shadow: 0 0 0 3px var(--warn)33, 0 0 20px var(--warn)44; }
+
+  .device-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--router-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: #0a1a2a;
+    box-shadow: 0 0 12px var(--router-color)44;
+    transition: all 0.2s;
+  }
+  .device-icon.pc {
+    border-color: var(--pc-color);
+    box-shadow: 0 0 12px var(--pc-color)44;
+    border-radius: 8px;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  .device-label {
+    margin-top: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.3;
+  }
+  .device-label .ip {
+    color: var(--muted);
+    font-size: 0.62rem;
+  }
+  .device-label .hostname {
+    font-weight: bold;
+    color: var(--accent);
+  }
+  .device-icon.pc .hostname { color: var(--accent2); }
+
+  /* LINK LABELS */
+  .link-label {
+    position: absolute;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    background: var(--bg);
+    padding: 1px 4px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 5;
+    white-space: nowrap;
+  }
+
+  /* CLI PANEL */
+  .cli-panel {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    grid-column: 2;
+    grid-row: 2;
+    overflow: hidden;
+  }
+  .cli-header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cli-device-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+  .cli-hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .cli-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 6px 10px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .cli-tab {
+    padding: 4px 12px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .cli-tab.active { background: var(--accent)22; border-color: var(--accent); color: var(--accent); }
+  .cli-tab:hover:not(.active) { border-color: var(--muted); color: var(--text); }
+
+  .cli-output {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: #8aff80;
+    background: #050a0f;
+  }
+  .cli-output .line-prompt { color: var(--accent); }
+  .cli-output .line-output { color: #8aff80; }
+  .cli-output .line-error { color: var(--danger); }
+  .cli-output .line-info { color: var(--muted); }
+  .cli-output .line-success { color: var(--accent2); }
+
+  .cli-input-row {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    background: #050a0f;
+    padding: 8px 14px;
+    gap: 8px;
+  }
+  .cli-prompt-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .cli-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: #fff;
+    caret-color: var(--accent2);
+  }
+  .no-device-msg {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    gap: 10px;
+    padding: 30px;
+    text-align: center;
+  }
+  .no-device-msg .icon { font-size: 2.5rem; }
+
+  /* RESULTS MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000000cc;
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 680px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 28px;
+    box-shadow: 0 0 60px #000a;
+  }
+  .modal-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+  }
+  .answer-section {
+    margin-bottom: 22px;
+  }
+  .answer-section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--accent3);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .answer-block {
+    background: #050a0f;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .answer-device {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--warn);
+    margin-bottom: 6px;
+  }
+  .answer-code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent2);
+    line-height: 1.7;
+    white-space: pre;
+  }
+  .close-btn {
+    background: var(--accent2);
+    border: none;
+    color: #000;
+    padding: 10px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 10px;
+  }
+  .close-btn:hover { background: #00ffaa; }
+
+  svg line { stroke-linecap: round; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+  <div class="header-title">🖥 HANDS-ON PRACTICAL EXAM</div>
+  <span class="progress-text" id="taskProgress">0 / 8 tasks noted</span>
+  <button class="submit-btn" onclick="showAnswers()">SUBMIT & REVEAL ▶</button>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main">
+
+  <!-- SCENARIO -->
+  <div class="scenario-panel">
+    <div class="scenario-label">▸ SCENARIO</div>
+    <div class="scenario-text">
+      You are the network administrator of a small campus. Configure the network as shown in the topology.
+      <strong>R1</strong> is the gateway router connected to <strong>R2</strong> via a serial WAN link (R1=DCE).
+      R2 connects to <strong>R3</strong> via another serial link (R2=DCE). Each router has a LAN subnet.
+      Configure <strong>static routing</strong> on R1 & R3, <strong>RIPv1</strong> on R2, and a <strong>DHCP pool</strong> on R1 for its LAN.
+      Click any device to open its CLI.
+    </div>
+  </div>
+
+  <!-- TASK LIST -->
+  <div class="task-panel">
+    <div class="task-panel-label">▸ TASK CHECKLIST</div>
+    <div class="task-item"><span class="task-num">T1</span><div class="task-check" id="chk0"></div><span>Assign IP addresses to all router interfaces</span></div>
+    <div class="task-item"><span class="task-num">T2</span><div class="task-check" id="chk1"></div><span>Set <code>clock rate</code> on R1 (DCE) Se0/0/0 and R2 (DCE) Se0/0/1</span></div>
+    <div class="task-item"><span class="task-num">T3</span><div class="task-check" id="chk2"></div><span>Configure static route on R1 to reach R3's LAN (192.168.30.0/24)</span></div>
+    <div class="task-item"><span class="task-num">T4</span><div class="task-check" id="chk3"></div><span>Configure default route on R3 pointing to R2</span></div>
+    <div class="task-item"><span class="task-num">T5</span><div class="task-check" id="chk4"></div><span>Enable RIPv1 on R2 — advertise all three network segments</span></div>
+    <div class="task-item"><span class="task-num">T6</span><div class="task-check" id="chk5"></div><span>Create DHCP pool on R1: exclude .1–.10, pool name LAN1, gateway 192.168.10.1</span></div>
+    <div class="task-item"><span class="task-num">T7</span><div class="task-check" id="chk6"></div><span>Configure PC1 to obtain IP via DHCP</span></div>
+    <div class="task-item"><span class="task-num">T8</span><div class="task-check" id="chk7"></div><span>Save configurations on all routers (<code>copy run start</code>)</span></div>
+  </div>
+
+  <!-- TOPOLOGY -->
+  <div class="topology-area" id="topoArea">
+    <svg class="topology-canvas" id="topoSVG"></svg>
+    <!-- Device nodes injected by JS -->
+  </div>
+
+  <!-- CLI PANEL -->
+  <div class="cli-panel" id="cliPanel">
+    <div class="no-device-msg" id="noDeviceMsg">
+      <div class="icon">🖱</div>
+      <div>Click a device on the topology<br>to open its CLI terminal</div>
+    </div>
+    <div id="cliContainer" style="display:none; flex-direction:column; height:100%;">
+      <div class="cli-header">
+        <span class="cli-device-name" id="cliDeviceName">R1</span>
+        <span class="cli-hint">Type commands below</span>
+      </div>
+      <div class="cli-tabs" id="cliTabs"></div>
+      <div class="cli-output" id="cliOutput"></div>
+      <div class="cli-input-row">
+        <span class="cli-prompt-label" id="cliPrompt">Router></span>
+        <input class="cli-input" id="cliInput" type="text" placeholder="enter command..." autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RESULTS MODAL -->
+<div class="modal-overlay" id="resultsModal">
+  <div class="modal">
+    <div class="modal-title">📋 ANSWER KEY & SOLUTION</div>
+
+    <div class="answer-section">
+      <div class="answer-section-title">TASK 1–2 — Interface IPs &amp; Clock Rate</div>
+      <div class="answer-block">
+        <div class="answer-device">R1 (192.168.10.1 LAN | 10.0.12.1 WAN to R2, DCE)</div>
+        <div class="answer-code">Router> enable
+Router# configure terminal
+Router(config)# hostname R1
+R1(config)# interface GigabitEthernet0/0
+R1(config-if)# ip address 192.168.10.1 255.255.255.0
+R1(config-if)# no shutdown
+R1(config-if)# exit
+R1(config)# interface Serial0/0/0
+R1(config-if)# ip address 10.0.12.1 255.255.255.252
+R1(config-if)# clock rate 64000
+R1(config-if)# no shutdown
+R1(config-if)# exit</div>
+      </div>
+      <div class="answer-block">
+        <div class="answer-device">R2 (10.0.12.2 WAN R1 | 10.0.23.1 WAN to R3, DCE | 192.168.20.1 LAN)</div>
+        <div class="answer-code">Router> enable
+Router# configure terminal
+Router(config)# hostname R2
+R2(config)# interface Serial0/0/0
+R2(config-if)# ip address 10.0.12.2 255.255.255.252
+R2(config-if)# no shutdown
+R2(config-if)# exit
+R2(config)# interface Serial0/0/1
+R2(config-if)# ip address 10.0.23.1 255.255.255.252
+R2(config-if)# clock rate 64000
+R2(config-if)# no shutdown
+R2(config-if)# exit
+R2(config)# interface GigabitEthernet0/0
+R2(config-if)# ip address 192.168.20.1 255.255.255.0
+R2(config-if)# no shutdown
+R2(config-if)# exit</div>
+      </div>
+      <div class="answer-block">
+        <div class="answer-device">R3 (10.0.23.2 WAN from R2 | 192.168.30.1 LAN)</div>
+        <div class="answer-code">Router> enable
+Router# configure terminal
+Router(config)# hostname R3
+R3(config)# interface Serial0/0/0
+R3(config-if)# ip address 10.0.23.2 255.255.255.252
+R3(config-if)# no shutdown
+R3(config-if)# exit
+R3(config)# interface GigabitEthernet0/0
+R3(config-if)# ip address 192.168.30.1 255.255.255.0
+R3(config-if)# no shutdown
+R3(config-if)# exit</div>
+      </div>
+    </div>
+
+    <div class="answer-section">
+      <div class="answer-section-title">TASK 3 — Static Route on R1 → R3's LAN</div>
+      <div class="answer-block">
+        <div class="answer-device">R1</div>
+        <div class="answer-code">R1(config)# ip route 192.168.30.0 255.255.255.0 10.0.12.2</div>
+      </div>
+    </div>
+
+    <div class="answer-section">
+      <div class="answer-section-title">TASK 4 — Default Route on R3 → R2</div>
+      <div class="answer-block">
+        <div class="answer-device">R3</div>
+        <div class="answer-code">R3(config)# ip route 0.0.0.0 0.0.0.0 10.0.23.1</div>
+      </div>
+    </div>
+
+    <div class="answer-section">
+      <div class="answer-section-title">TASK 5 — RIPv1 on R2</div>
+      <div class="answer-block">
+        <div class="answer-device">R2</div>
+        <div class="answer-code">R2(config)# router rip
+R2(config-router)# network 10.0.0.0
+R2(config-router)# network 192.168.20.0
+R2(config-router)# exit</div>
+      </div>
+    </div>
+
+    <div class="answer-section">
+      <div class="answer-section-title">TASK 6 — DHCP Pool on R1</div>
+      <div class="answer-block">
+        <div class="answer-device">R1</div>
+        <div class="answer-code">R1(config)# ip dhcp excluded-address 192.168.10.1 192.168.10.10
+R1(config)# ip dhcp pool LAN1
+R1(dhcp-config)# network 192.168.10.0 255.255.255.0
+R1(dhcp-config)# default-router 192.168.10.1
+R1(dhcp-config)# dns-server 8.8.8.8
+R1(dhcp-config)# exit</div>
+      </div>
+    </div>
+
+    <div class="answer-section">
+      <div class="answer-section-title">TASK 7 — PC1 DHCP (IP Configuration)</div>
+      <div class="answer-block">
+        <div class="answer-device">PC1 — IP Configuration dialog</div>
+        <div class="answer-code">IP Configuration: DHCP (select radio button)
+  → PC will auto-receive: 192.168.10.11 (or next available)
+  → Gateway:  192.168.10.1
+  → DNS:      8.8.8.8</div>
+      </div>
+    </div>
+
+    <div class="answer-section">
+      <div class="answer-section-title">TASK 8 — Save Config on All Routers</div>
+      <div class="answer-block">
+        <div class="answer-device">R1 / R2 / R3</div>
+        <div class="answer-code">R1# copy running-config startup-config
+  Destination filename [startup-config]? (press Enter)
+  Building configuration... [OK]</div>
+      </div>
+    </div>
+
+    <button class="close-btn" onclick="closeModal()">✓ CLOSE</button>
+  </div>
+</div>
+
+<script>
+// ─── TOPOLOGY DATA ───────────────────────────────────────────────────────────
+const DEVICES = [
+  { id:'R1', type:'router', emoji:'🔵', label:'R1', sub:'192.168.10.1\n10.0.12.1', x:22, y:38 },
+  { id:'R2', type:'router', emoji:'🟡', label:'R2', sub:'192.168.20.1\n10.0.12.2 | 10.0.23.1', x:50, y:38 },
+  { id:'R3', type:'router', emoji:'🟠', label:'R3', sub:'192.168.30.1\n10.0.23.2', x:78, y:38 },
+  { id:'PC1', type:'pc', emoji:'💻', label:'PC1', sub:'DHCP Client', x:15, y:72 },
+  { id:'PC2', type:'pc', emoji:'💻', label:'PC2', sub:'192.168.20.x', x:50, y:72 },
+  { id:'PC3', type:'pc', emoji:'💻', label:'PC3', sub:'192.168.30.x', x:85, y:72 },
+];
+
+const LINKS = [
+  { a:'R1', b:'R2', label:'Se0/0/0 ←DCE→ Se0/0/0\n10.0.12.0/30' },
+  { a:'R2', b:'R3', label:'Se0/0/1 ←DCE→ Se0/0/0\n10.0.23.0/30' },
+  { a:'R1', b:'PC1', label:'Gi0/0 — LAN1\n192.168.10.0/24' },
+  { a:'R2', b:'PC2', label:'Gi0/0 — LAN2\n192.168.20.0/24' },
+  { a:'R3', b:'PC3', label:'Gi0/0 — LAN3\n192.168.30.0/24' },
+];
+
+// ─── CLI STATE ────────────────────────────────────────────────────────────────
+const deviceState = {};
+DEVICES.forEach(d => {
+  deviceState[d.id] = {
+    mode: 'user',          // user | enable | config | if | dhcp | router
+    hostname: d.id,
+    history: [],
+    ifContext: null,
+    configured: false,
+  };
+});
+
+let selectedDevice = null;
+let taskDone = [false,false,false,false,false,false,false,false];
+
+// ─── RENDER TOPOLOGY ─────────────────────────────────────────────────────────
+function renderTopology() {
+  const area = document.getElementById('topoArea');
+  const svg = document.getElementById('topoSVG');
+
+  // Remove old nodes
+  document.querySelectorAll('.device-node').forEach(n => n.remove());
+  document.querySelectorAll('.link-label').forEach(n => n.remove());
+
+  const w = area.offsetWidth;
+  const h = area.offsetHeight;
+
+  // SVG links
+  let svgContent = '';
+  LINKS.forEach(lnk => {
+    const da = DEVICES.find(d=>d.id===lnk.a);
+    const db = DEVICES.find(d=>d.id===lnk.b);
+    const x1 = da.x/100*w, y1 = da.y/100*h;
+    const x2 = db.x/100*w, y2 = db.y/100*h;
+    const isSerial = lnk.label.includes('Se');
+    svgContent += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+      stroke="${isSerial ? '#00d4ff55' : '#00ff8844'}"
+      stroke-width="${isSerial ? 2 : 1.5}"
+      stroke-dasharray="${isSerial ? '0' : '6,4'}" />`;
+
+    // Link label mid
+    const mx = (x1+x2)/2, my = (y1+y2)/2;
+    const lblEl = document.createElement('div');
+    lblEl.className = 'link-label';
+    lblEl.style.left = mx + 'px';
+    lblEl.style.top = my + 'px';
+    lblEl.style.transform = 'translate(-50%,-50%)';
+    lblEl.innerHTML = lnk.label.replace('\n','<br>');
+    area.appendChild(lblEl);
+  });
+  svg.innerHTML = svgContent;
+
+  // Device nodes
+  DEVICES.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'device-node' + (d.type==='pc' ? '' : '');
+    el.id = 'node-' + d.id;
+    el.style.left = (d.x/100*w - 30) + 'px';
+    el.style.top = (d.y/100*h - 35) + 'px';
+    el.onclick = () => selectDevice(d.id);
+
+    const subLines = d.sub.split('\n').map(s => `<span class="ip">${s}</span>`).join('<br>');
+    el.innerHTML = `
+      <div class="device-icon ${d.type==='pc'?'pc':''}">${d.emoji}</div>
+      <div class="device-label">
+        <span class="hostname">${d.label}</span><br>${subLines}
+      </div>`;
+    area.appendChild(el);
+  });
+}
+
+// ─── SELECT DEVICE ────────────────────────────────────────────────────────────
+function selectDevice(id) {
+  document.querySelectorAll('.device-node').forEach(n => n.classList.remove('selected'));
+  document.getElementById('node-' + id).classList.add('selected');
+  selectedDevice = id;
+
+  document.getElementById('noDeviceMsg').style.display = 'none';
+  const cc = document.getElementById('cliContainer');
+  cc.style.display = 'flex';
+  cc.style.flexDirection = 'column';
+  cc.style.height = '100%';
+
+  document.getElementById('cliDeviceName').textContent = id + ' — CLI Terminal';
+
+  // Tabs (only show router tabs for routers)
+  const tabsEl = document.getElementById('cliTabs');
+  const st = deviceState[id];
+  const promptStr = getPrompt(id);
+  document.getElementById('cliPrompt').textContent = promptStr;
+
+  renderCLIOutput(id);
+  document.getElementById('cliInput').focus();
+}
+
+function getPrompt(id) {
+  const st = deviceState[id];
+  const hn = st.hostname;
+  if (st.mode === 'user') return hn + '>';
+  if (st.mode === 'enable') return hn + '#';
+  if (st.mode === 'config') return hn + '(config)#';
+  if (st.mode === 'if') return hn + `(config-if)#`;
+  if (st.mode === 'dhcp') return hn + '(dhcp-config)#';
+  if (st.mode === 'router') return hn + '(config-router)#';
+  return hn + '>';
+}
+
+function renderCLIOutput(id) {
+  const out = document.getElementById('cliOutput');
+  const st = deviceState[id];
+  if (st.history.length === 0) {
+    out.innerHTML = `<span class="line-info">Cisco IOS Software — ${id} Terminal Ready\nType 'enable' to enter privileged mode.\n</span>`;
+  } else {
+    out.innerHTML = st.history.map(h => {
+      if (h.type==='prompt') return `<span class="line-prompt">${h.text}</span>`;
+      if (h.type==='output') return `<span class="line-output">${h.text}</span>`;
+      if (h.type==='error') return `<span class="line-error">${h.text}</span>`;
+      if (h.type==='info') return `<span class="line-info">${h.text}</span>`;
+      if (h.type==='success') return `<span class="line-success">${h.text}</span>`;
+      return h.text;
+    }).join('\n');
+  }
+  out.scrollTop = out.scrollHeight;
+}
+
+// ─── CLI INPUT HANDLER ────────────────────────────────────────────────────────
+document.getElementById('cliInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const cmd = this.value.trim();
+    this.value = '';
+    if (!selectedDevice) return;
+    processCommand(selectedDevice, cmd);
+  }
+});
+
+function pushHistory(id, prompt, cmd, lines) {
+  const st = deviceState[id];
+  st.history.push({ type:'prompt', text: prompt + ' ' + cmd });
+  lines.forEach(l => st.history.push(l));
+  renderCLIOutput(id);
+  document.getElementById('cliPrompt').textContent = getPrompt(id);
+}
+
+function processCommand(id, cmd) {
+  const st = deviceState[id];
+  const prompt = getPrompt(id);
+  const c = cmd.toLowerCase().trim();
+
+  if (c === '') { pushHistory(id, prompt, '', []); return; }
+
+  // === USER MODE ===
+  if (st.mode === 'user') {
+    if (c === 'enable') {
+      st.mode = 'enable';
+      pushHistory(id, prompt, cmd, []);
+    } else {
+      pushHistory(id, prompt, cmd, [{type:'error', text:`% Unknown command: ${cmd}`}]);
+    }
+    return;
+  }
+
+  // === ENABLE MODE ===
+  if (st.mode === 'enable') {
+    if (c === 'configure terminal' || c === 'conf t') {
+      st.mode = 'config';
+      pushHistory(id, prompt, cmd, [{type:'info', text:'Enter configuration commands, one per line. End with CNTL/Z.'}]);
+    } else if (c === 'show ip route') {
+      pushHistory(id, prompt, cmd, [{type:'output', text: showIPRoute(id)}]);
+    } else if (c === 'show ip protocols') {
+      pushHistory(id, prompt, cmd, [{type:'output', text: showIPProtocols(id)}]);
+    } else if (c === 'show ip dhcp binding') {
+      pushHistory(id, prompt, cmd, [{type:'output', text: showDHCPBinding(id)}]);
+    } else if (c === 'show running-config' || c === 'show run') {
+      pushHistory(id, prompt, cmd, [{type:'output', text: showRunning(id)}]);
+    } else if (c === 'copy running-config startup-config' || c === 'copy run start') {
+      markTask(7);
+      pushHistory(id, prompt, cmd, [
+        {type:'output', text:'Destination filename [startup-config]?'},
+        {type:'success', text:'Building configuration... [OK]'},
+      ]);
+    } else if (c === 'disable') {
+      st.mode = 'user';
+      pushHistory(id, prompt, cmd, []);
+    } else {
+      pushHistory(id, prompt, cmd, [{type:'error', text:`% Invalid input detected: '${cmd}'`}]);
+    }
+    return;
+  }
+
+  // === CONFIG MODE ===
+  if (st.mode === 'config') {
+    if (c.startsWith('hostname ')) {
+      const hn = cmd.split(' ')[1];
+      st.hostname = hn;
+      pushHistory(id, prompt, cmd, []);
+    } else if (c.startsWith('interface ')) {
+      st.mode = 'if';
+      st.ifContext = cmd.split(' ').slice(1).join(' ');
+      pushHistory(id, prompt, cmd, []);
+    } else if (c.startsWith('ip route')) {
+      markTask(2); // static route
+      pushHistory(id, prompt, cmd, [{type:'success', text:'% Static route configured.'}]);
+    } else if (c.startsWith('ip dhcp excluded-address')) {
+      markTask(5);
+      pushHistory(id, prompt, cmd, [{type:'success', text:'% DHCP excluded addresses set.'}]);
+    } else if (c.startsWith('ip dhcp pool')) {
+      st.mode = 'dhcp';
+      pushHistory(id, prompt, cmd, [{type:'info', text:'Entering DHCP pool config mode.'}]);
+    } else if (c.startsWith('router rip')) {
+      st.mode = 'router';
+      pushHistory(id, prompt, cmd, []);
+    } else if (c === 'exit' || c === 'end') {
+      st.mode = 'enable';
+      pushHistory(id, prompt, cmd, []);
+    } else {
+      pushHistory(id, prompt, cmd, [{type:'error', text:`% Unrecognized command: '${cmd}'`}]);
+    }
+    return;
+  }
+
+  // === INTERFACE MODE ===
+  if (st.mode === 'if') {
+    if (c.startsWith('ip address')) {
+      markTask(0); // IPs assigned
+      pushHistory(id, prompt, cmd, [{type:'success', text:'% IP address configured.'}]);
+    } else if (c.startsWith('clock rate')) {
+      markTask(1);
+      pushHistory(id, prompt, cmd, [{type:'success', text:'% Clock rate set (DCE).'}]);
+    } else if (c === 'no shutdown') {
+      pushHistory(id, prompt, cmd, [
+        {type:'output', text:`%LINK-5-CHANGED: Interface ${st.ifContext}, changed state to up`},
+        {type:'success', text:`%LINEPROTO-5-UPDOWN: Line protocol on Interface ${st.ifContext}, changed state to up`},
+      ]);
+    } else if (c === 'exit') {
+      st.mode = 'config';
+      st.ifContext = null;
+      pushHistory(id, prompt, cmd, []);
+    } else if (c === 'end') {
+      st.mode = 'enable';
+      st.ifContext = null;
+      pushHistory(id, prompt, cmd, []);
+    } else {
+      pushHistory(id, prompt, cmd, [{type:'error', text:`% Invalid input: '${cmd}'`}]);
+    }
+    return;
+  }
+
+  // === DHCP MODE ===
+  if (st.mode === 'dhcp') {
+    if (c.startsWith('network ')) {
+      pushHistory(id, prompt, cmd, [{type:'success', text:'% DHCP pool network set.'}]);
+    } else if (c.startsWith('default-router')) {
+      markTask(5);
+      pushHistory(id, prompt, cmd, [{type:'success', text:'% Default router configured.'}]);
+    } else if (c.startsWith('dns-server')) {
+      pushHistory(id, prompt, cmd, [{type:'success', text:'% DNS server set.'}]);
+    } else if (c === 'exit' || c === 'end') {
+      st.mode = 'config';
+      pushHistory(id, prompt, cmd, []);
+    } else {
+      pushHistory(id, prompt, cmd, [{type:'error', text:`% Invalid DHCP command: '${cmd}'`}]);
+    }
+    return;
+  }
+
+  // === ROUTER RIP MODE ===
+  if (st.mode === 'router') {
+    if (c.startsWith('network ')) {
+      markTask(4);
+      pushHistory(id, prompt, cmd, [{type:'success', text:'% Network added to RIP.'}]);
+    } else if (c.startsWith('version ')) {
+      pushHistory(id, prompt, cmd, [{type:'output', text:'% RIP version set.'}]);
+    } else if (c === 'exit' || c === 'end') {
+      st.mode = 'config';
+      pushHistory(id, prompt, cmd, []);
+    } else {
+      pushHistory(id, prompt, cmd, [{type:'error', text:`% Invalid router command: '${cmd}'`}]);
+    }
+    return;
+  }
+
+  // === PC MODE (simplified IP config) ===
+  if (id.startsWith('PC')) {
+    if (c === 'ipconfig /all' || c === 'ipconfig') {
+      pushHistory(id, prompt, cmd, [{type:'output', text: pcIPConfig(id)}]);
+    } else if (c.includes('dhcp') || c.includes('ip dhcp')) {
+      markTask(6);
+      pushHistory(id, prompt, cmd, [{type:'success', text:'% Set to DHCP. IP obtained: 192.168.10.11'}]);
+    } else {
+      pushHistory(id, prompt, cmd, [{type:'info', text:`[PC] Command '${cmd}' noted.`}]);
+    }
+    return;
+  }
+
+  pushHistory(id, prompt, cmd, [{type:'error', text:`% Unknown: '${cmd}'`}]);
+}
+
+// ─── FAKE SHOW COMMANDS ───────────────────────────────────────────────────────
+function showIPRoute(id) {
+  const routes = {
+    R1: `Codes: S - static, C - connected\n\nS    192.168.30.0/24 [1/0] via 10.0.12.2\nC    192.168.10.0/24 is directly connected, GigabitEthernet0/0\nC    10.0.12.0/30 is directly connected, Serial0/0/0`,
+    R2: `Codes: R - RIP, C - connected\n\nR    192.168.10.0/24 [120/1] via 10.0.12.1\nR    192.168.30.0/24 [120/1] via 10.0.23.2\nC    192.168.20.0/24 is directly connected, GigabitEthernet0/0\nC    10.0.12.0/30 is directly connected, Serial0/0/0\nC    10.0.23.0/30 is directly connected, Serial0/0/1`,
+    R3: `Codes: S - static, C - connected\n\nS*   0.0.0.0/0 [1/0] via 10.0.23.1\nC    192.168.30.0/24 is directly connected, GigabitEthernet0/0\nC    10.0.23.0/30 is directly connected, Serial0/0/0`,
+  };
+  return routes[id] || '% Route table empty';
+}
+function showIPProtocols(id) {
+  if (id === 'R2') return `Routing Protocol is "rip"\n  Sending updates every 30 seconds\n  Maximum path: 4\n  Routing for Networks:\n    10.0.0.0\n    192.168.20.0`;
+  return '% No routing protocols configured';
+}
+function showDHCPBinding(id) {
+  if (id === 'R1') return `IP address       Client-ID       Lease expiration\n192.168.10.11    0100.5056.be12  Apr 20 2026 01:00 AM`;
+  return '% No DHCP bindings';
+}
+function showRunning(id) {
+  return `! ${id} running config (abbreviated)\nhostname ${deviceState[id].hostname}\n!\ninterface GigabitEthernet0/0\n ip address [configured]\n no shutdown\n!`;
+}
+function pcIPConfig(id) {
+  const configs = {
+    PC1: `Ethernet adapter:\n  IPv4 Address: 192.168.10.11 (DHCP)\n  Subnet Mask: 255.255.255.0\n  Default Gateway: 192.168.10.1`,
+    PC2: `Ethernet adapter:\n  IPv4 Address: 192.168.20.10\n  Subnet Mask: 255.255.255.0\n  Default Gateway: 192.168.20.1`,
+    PC3: `Ethernet adapter:\n  IPv4 Address: 192.168.30.10\n  Subnet Mask: 255.255.255.0\n  Default Gateway: 192.168.30.1`,
+  };
+  return configs[id] || '% No IP config';
+}
+
+// ─── TASK MARKING ─────────────────────────────────────────────────────────────
+function markTask(idx) {
+  if (taskDone[idx]) return;
+  taskDone[idx] = true;
+  const el = document.getElementById('chk' + idx);
+  el.classList.add('done');
+  el.textContent = '✓';
+  updateProgress();
+}
+function updateProgress() {
+  const done = taskDone.filter(Boolean).length;
+  document.getElementById('taskProgress').textContent = `${done} / 8 tasks noted`;
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function showAnswers() {
+  document.getElementById('resultsModal').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('resultsModal').classList.remove('show');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  renderTopology();
+});
+window.addEventListener('resize', () => {
+  renderTopology();
+});
+</script>
+</body>
+</html>

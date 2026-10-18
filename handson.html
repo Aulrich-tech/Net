@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hands-On Practical Exam</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@400;600;700;900&family=Orbitron:wght@700;900&display=swap');
+
+:root {
+  --bg:#0b0f14; --surface:#0f1620; --panel:#121b26; --border:#1c2d40;
+  --accent:#00c8ff; --green:#39ff85; --orange:#ff7c35; --warn:#ffd84d;
+  --danger:#ff4560; --muted:#4a6480; --text:#c8d8e8;
+  --router-bg:#0d2035; --switch-bg:#0d2a1a; --pc-bg:#1a1a2e;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 18px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+.hdr-title{font-family:'Orbitron',monospace;font-size:.85rem;color:var(--accent);letter-spacing:2px;flex:1;}
+.btn-back{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 13px;border-radius:4px;cursor:pointer;font-family:'Exo 2',sans-serif;font-size:.85rem;transition:all .2s;}
+.btn-back:hover{border-color:var(--accent);color:var(--accent);}
+.btn-submit{background:var(--green);border:none;color:#000;padding:7px 18px;border-radius:4px;cursor:pointer;font-family:'Orbitron',monospace;font-size:.7rem;font-weight:700;letter-spacing:1px;}
+.btn-submit:hover{background:#55ffaa;}
+.hdr-prog{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--warn);}
+
+.body{display:flex;flex:1;overflow:hidden;}
+.left-col{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+
+.scenario{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 18px;flex-shrink:0;}
+.sc-label{font-family:'Orbitron',monospace;font-size:.58rem;color:var(--orange);letter-spacing:3px;margin-bottom:4px;}
+.sc-text{font-size:.86rem;line-height:1.5;}
+.sc-text b{color:var(--accent);}
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:.68rem;margin:0 2px;font-family:'Share Tech Mono',monospace;}
+.tag.b{background:#00c8ff18;border:1px solid #00c8ff55;color:#00c8ff;}
+.tag.g{background:#39ff8518;border:1px solid #39ff8555;color:#39ff85;}
+.tag.o{background:#ff7c3518;border:1px solid #ff7c3555;color:#ff7c35;}
+.tag.w{background:#ffd84d18;border:1px solid #ffd84d55;color:#ffd84d;}
+
+.topo{flex:1;position:relative;overflow:hidden;background:var(--bg);
+  background-image:radial-gradient(circle at 28% 35%,#00c8ff08 0,transparent 50%),radial-gradient(circle at 72% 65%,#39ff8507 0,transparent 50%),linear-gradient(#1c2d4033 1px,transparent 1px),linear-gradient(90deg,#1c2d4033 1px,transparent 1px);
+  background-size:auto,auto,36px 36px,36px 36px;}
+#topoSVG{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+
+.node{position:absolute;display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;z-index:10;transition:filter .15s;}
+.node:hover{filter:brightness(1.25);}
+.node.sel .dicon{outline:2px solid var(--warn);outline-offset:3px;box-shadow:0 0 20px #ffd84d66!important;}
+
+.dicon{display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.dicon.router{width:54px;height:54px;border-radius:50%;border:2px solid var(--accent);background:var(--router-bg);box-shadow:0 0 12px #00c8ff33;}
+.dicon.switch{width:52px;height:28px;border-radius:4px;border:1.5px solid var(--green);background:var(--switch-bg);box-shadow:0 0 8px #39ff8533;}
+.dicon.pc{width:42px;height:34px;border-radius:4px;border:1.5px solid #7a7aaa;background:var(--pc-bg);box-shadow:0 0 6px #7a7aaa22;}
+
+.dlabel{margin-top:4px;text-align:center;line-height:1.25;}
+.hn{font-family:'Share Tech Mono',monospace;font-size:.65rem;font-weight:700;color:var(--accent);}
+.hn.sw{color:var(--green);}
+.hn.pc-c{color:#9999cc;}
+.dip{font-size:.57rem;color:var(--muted);font-family:'Share Tech Mono',monospace;display:block;}
+.dce-lbl{font-size:.54rem;color:var(--orange);font-family:'Share Tech Mono',monospace;font-weight:700;}
+.pw-lbl{font-size:.54rem;color:var(--warn);font-family:'Share Tech Mono',monospace;}
+
+.llbl{position:absolute;font-family:'Share Tech Mono',monospace;font-size:.54rem;color:#4a6480;background:#0b0f14ee;padding:1px 5px;border-radius:2px;pointer-events:none;z-index:6;white-space:nowrap;line-height:1.35;}
+
+.right-col{width:430px;flex-shrink:0;display:flex;flex-direction:column;border-left:1px solid var(--border);background:var(--surface);}
+
+.tasks{padding:10px 12px;border-bottom:1px solid var(--border);overflow-y:auto;max-height:218px;}
+.tasks-lbl{font-family:'Orbitron',monospace;font-size:.57rem;color:var(--warn);letter-spacing:3px;margin-bottom:7px;}
+.ti{display:flex;gap:7px;align-items:flex-start;padding:5px 0;border-bottom:1px solid #1c2d4033;font-size:.81rem;line-height:1.3;}
+.ti:last-child{border-bottom:none;}
+.tnum{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:var(--accent);min-width:20px;padding-top:1px;}
+.tchk{width:15px;height:15px;min-width:15px;border:1px solid var(--muted);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;margin-top:2px;transition:all .2s;}
+.tchk.done{border-color:var(--green);background:var(--green);color:#000;}
+.ttag{font-size:.58rem;padding:1px 5px;border-radius:2px;margin-left:auto;white-space:nowrap;font-family:'Share Tech Mono',monospace;}
+.ttag.sr{background:#00c8ff18;color:#00c8ff;border:1px solid #00c8ff44;}
+.ttag.vl{background:#ffd84d18;color:#ffd84d;border:1px solid #ffd84d44;}
+.ttag.rip{background:#ff7c3518;color:#ff7c35;border:1px solid #ff7c3544;}
+.ttag.dh{background:#39ff8518;color:#39ff85;border:1px solid #39ff8544;}
+.ttag.sec{background:#cc88ff18;color:#cc88ff;border:1px solid #cc88ff44;}
+
+.cli-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+.no-dev{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:.9rem;gap:8px;text-align:center;}
+.no-dev .ico{font-size:2rem;}
+#cliBox{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.cli-hdr{background:var(--panel);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;flex-shrink:0;}
+.cli-dev{font-family:'Orbitron',monospace;font-size:.7rem;color:var(--accent);letter-spacing:1px;flex:1;}
+.cli-hint{font-size:.68rem;color:var(--muted);}
+.cli-out{flex:1;overflow-y:auto;padding:10px 14px;font-family:'Share Tech Mono',monospace;font-size:.71rem;line-height:1.65;background:#040a10;}
+.lp{color:#00c8ff;}.lo{color:#7dff9a;}.le{color:#ff4560;}.li{color:#4a6480;}.ls{color:#39ff85;}.lw{color:#ffd84d;}
+.cli-inp-row{display:flex;align-items:center;border-top:1px solid var(--border);background:#040a10;padding:7px 14px;gap:8px;flex-shrink:0;}
+.cli-prmpt{font-family:'Share Tech Mono',monospace;font-size:.71rem;color:var(--accent);white-space:nowrap;}
+.cli-inp{flex:1;background:transparent;border:none;outline:none;font-family:'Share Tech Mono',monospace;font-size:.71rem;color:#fff;caret-color:var(--green);}
+
+.overlay{display:none;position:fixed;inset:0;background:#000d;z-index:200;align-items:center;justify-content:center;}
+.overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:8px;width:93%;max-width:730px;max-height:88vh;overflow-y:auto;padding:24px;box-shadow:0 0 80px #000c;}
+.modal-title{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--accent);margin-bottom:16px;letter-spacing:2px;}
+.as{margin-bottom:18px;}
+.as-t{font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:2px;color:var(--orange);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.ab{background:#040a10;border:1px solid var(--border);border-radius:4px;padding:10px 14px;margin-bottom:6px;}
+.adev{font-family:'Share Tech Mono',monospace;font-size:.67rem;color:var(--warn);margin-bottom:5px;}
+.acode{font-family:'Share Tech Mono',monospace;font-size:.69rem;color:var(--green);line-height:1.75;white-space:pre;}
+.close-btn{background:var(--green);border:none;color:#000;padding:9px 22px;border-radius:4px;cursor:pointer;font-family:'Orbitron',monospace;font-size:.7rem;font-weight:700;margin-top:6px;}
+.close-btn:hover{background:#55ffaa;}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <button class="btn-back" onclick="window.location.href='index.html'">← Back</button>
+  <div class="hdr-title">🖥 HANDS-ON PRACTICAL EXAM</div>
+  <span class="hdr-prog" id="prog">0 / 12 tasks</span>
+  <button class="btn-submit" onclick="openModal()">SUBMIT &amp; REVEAL ▶</button>
+</div>
+
+<div class="body">
+<div class="left-col">
+
+  <div class="scenario">
+    <div class="sc-label">▸ SCENARIO &amp; INSTRUCTIONS</div>
+    <div class="sc-text">
+      You are the network administrator of a 3-site campus WAN.
+      <b>Aguinaldo</b> is the hub router (center, <span style="color:var(--orange);font-weight:700;">DCE on both serials</span>).
+      <b>Bonifacio</b> (left) connects via Se2/0 and serves two LANs via Switch-B1 &amp; Switch-B2.
+      <b>Rizal</b> (right) connects via Se3/0 and serves two LANs via Switch-R1 &amp; Switch-R2. PC4 is on Aguinaldo's LAN.
+      &nbsp;Configure: <span class="tag b">Static Routes</span> on Bonifacio &amp; Rizal
+      <span class="tag o">RIPv1</span> on Aguinaldo
+      <span class="tag g">DHCP</span> on Bonifacio for LAN-B1
+      <span class="tag w">VLSM</span> addressing as labeled. Set security passwords per device. Click any device to open its CLI.
+    </div>
+  </div>
+
+  <div class="topo" id="topo">
+    <svg id="topoSVG"></svg>
+  </div>
+</div>
+
+<div class="right-col">
+  <div class="tasks">
+    <div class="tasks-lbl">▸ TASK CHECKLIST</div>
+    <div class="ti"><span class="tnum">T1</span><div class="tchk" id="c0"></div><span>Set hostnames: Bonifacio, Aguinaldo, Rizal</span><span class="ttag sec">Security</span></div>
+    <div class="ti"><span class="tnum">T2</span><div class="tchk" id="c1"></div><span>Set Telnet &amp; Enable passwords on all routers</span><span class="ttag sec">Security</span></div>
+    <div class="ti"><span class="tnum">T3</span><div class="tchk" id="c2"></div><span>Assign IPs to all router interfaces per VLSM table</span><span class="ttag vl">VLSM</span></div>
+    <div class="ti"><span class="tnum">T4</span><div class="tchk" id="c3"></div><span>Set <code>clock rate 64000</code> on Aguinaldo Se2/0 &amp; Se3/0 (DCE)</span><span class="ttag vl">VLSM</span></div>
+    <div class="ti"><span class="tnum">T5</span><div class="tchk" id="c4"></div><span>Static routes on Bonifacio → Rizal's LANs &amp; Aguinaldo LAN via 172.16.0.2</span><span class="ttag sr">Static</span></div>
+    <div class="ti"><span class="tnum">T6</span><div class="tchk" id="c5"></div><span>Default route on Rizal → Aguinaldo (172.16.8.1)</span><span class="ttag sr">Static</span></div>
+    <div class="ti"><span class="tnum">T7</span><div class="tchk" id="c6"></div><span>Enable RIPv1 on Aguinaldo — advertise all three connected networks</span><span class="ttag rip">RIPv1</span></div>
+    <div class="ti"><span class="tnum">T8</span><div class="tchk" id="c7"></div><span>DHCP on Bonifacio: exclude .1–.5, pool LANB1, network 172.16.16.0/27, GW .1</span><span class="ttag dh">DHCP</span></div>
+    <div class="ti"><span class="tnum">T9</span><div class="tchk" id="c8"></div><span>Set PC0 &amp; PC1 to obtain IP via DHCP (click PC → type dhcp)</span><span class="ttag dh">DHCP</span></div>
+    <div class="ti"><span class="tnum">T10</span><div class="tchk" id="c9"></div><span>Manually assign IPs to PC2–PC8 per addressing table</span><span class="ttag vl">VLSM</span></div>
+    <div class="ti"><span class="tnum">T11</span><div class="tchk" id="c10"></div><span>Verify: <code>show ip route</code> on all routers</span><span class="ttag sr">Static</span></div>
+    <div class="ti"><span class="tnum">T12</span><div class="tchk" id="c11"></div><span>Save all configs: <code>copy running-config startup-config</code></span><span class="ttag sec">Security</span></div>
+  </div>
+
+  <div class="cli-wrap">
+    <div class="no-dev" id="nodev"><div class="ico">🖱</div><div>Click any device on the<br>topology to open its CLI</div></div>
+    <div id="cliBox">
+      <div class="cli-hdr">
+        <span class="cli-dev" id="cliName">—</span>
+        <span class="cli-hint" id="cliHint">Cisco IOS commands</span>
+      </div>
+      <div class="cli-out" id="cliOut"></div>
+      <div class="cli-inp-row">
+        <span class="cli-prmpt" id="cliPrmpt">Router></span>
+        <input class="cli-inp" id="cliInp" type="text" autocomplete="off" spellcheck="false" placeholder="type command…">
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal">
+<div class="modal">
+  <div class="modal-title">📋 ANSWER KEY — Full Configuration</div>
+
+  <div class="as">
+    <div class="as-t">VLSM ADDRESSING TABLE</div>
+    <div class="ab"><div class="acode">Network             Mask                  Assignment
+────────────────────────────────────────────────────────────
+172.16.0.0/30       255.255.255.252       Bonifacio Se2/0 .1  ↔  Aguinaldo Se2/0 .2
+172.16.8.0/30       255.255.255.252       Aguinaldo Se3/0 .1  ↔  Rizal Se3/0 .2
+172.16.16.0/27      255.255.255.224       LAN-B1: GW .1 | PC0 DHCP | PC1 DHCP
+172.16.24.0/27      255.255.255.224       LAN-B2: GW .1 | PC2 .2  | PC3 .3
+172.16.32.0/28      255.255.255.240       LAN-AG: GW .1 | PC4 .2
+172.16.40.0/27      255.255.255.224       LAN-R1: GW .1 | PC5 .2  | PC6 .3
+172.16.48.0/27      255.255.255.224       LAN-R2: GW .1 | PC7 .2  | PC8 .3</div></div>
+  </div>
+
+  <div class="as">
+    <div class="as-t">TASKS 1 &amp; 2 — Hostnames &amp; Security Passwords</div>
+    <div class="ab">
+      <div class="adev">All Routers — example shown for Bonifacio (repeat for Aguinaldo &amp; Rizal)</div>
+      <div class="acode">Router> enable
+Router# configure terminal
+Router(config)# hostname Bonifacio
+Bonifacio(config)# enable password CCNA2025
+Bonifacio(config)# line vty 0 4
+Bonifacio(config-line)# password TELNET01
+Bonifacio(config-line)# login
+Bonifacio(config-line)# exit</div>
+    </div>
+    <div class="ab"><div class="acode">Router       Hostname     Enable PW    Telnet PW
+────────────────────────────────────────────
+Router0      Bonifacio    CCNA2025     TELNET01
+Router1      Aguinaldo    CCNA2025     TELNET02
+Router2      Rizal        CCNA2025     TELNET03</div></div>
+  </div>
+
+  <div class="as">
+    <div class="as-t">TASKS 3 &amp; 4 — Interface IPs &amp; Clock Rate (DCE = Aguinaldo)</div>
+    <div class="ab">
+      <div class="adev">Bonifacio</div>
+      <div class="acode">Bonifacio(config)# interface Serial2/0
+Bonifacio(config-if)# ip address 172.16.0.1 255.255.255.252
+Bonifacio(config-if)# no shutdown
+Bonifacio(config-if)# exit
+Bonifacio(config)# interface FastEthernet0/0
+Bonifacio(config-if)# ip address 172.16.16.1 255.255.255.224
+Bonifacio(config-if)# no shutdown
+Bonifacio(config-if)# exit
+Bonifacio(config)# interface FastEthernet1/0
+Bonifacio(config-if)# ip address 172.16.24.1 255.255.255.224
+Bonifacio(config-if)# no shutdown
+Bonifacio(config-if)# exit</div>
+    </div>
+    <div class="ab">
+      <div class="adev">Aguinaldo — DCE on BOTH serials: must add clock rate!</div>
+      <div class="acode">Aguinaldo(config)# interface Serial2/0
+Aguinaldo(config-if)# ip address 172.16.0.2 255.255.255.252
+Aguinaldo(config-if)# clock rate 64000
+Aguinaldo(config-if)# no shutdown
+Aguinaldo(config-if)# exit
+Aguinaldo(config)# interface Serial3/0
+Aguinaldo(config-if)# ip address 172.16.8.1 255.255.255.252
+Aguinaldo(config-if)# clock rate 64000
+Aguinaldo(config-if)# no shutdown
+Aguinaldo(config-if)# exit
+Aguinaldo(config)# interface FastEthernet0/0
+Aguinaldo(config-if)# ip address 172.16.32.1 255.255.255.240
+Aguinaldo(config-if)# no shutdown
+Aguinaldo(config-if)# exit</div>
+    </div>
+    <div class="ab">
+      <div class="adev">Rizal</div>
+      <div class="acode">Rizal(config)# interface Serial3/0
+Rizal(config-if)# ip address 172.16.8.2 255.255.255.252
+Rizal(config-if)# no shutdown
+Rizal(config-if)# exit
+Rizal(config)# interface FastEthernet0/0
+Rizal(config-if)# ip address 172.16.40.1 255.255.255.224
+Rizal(config-if)# no shutdown
+Rizal(config-if)# exit
+Rizal(config)# interface FastEthernet1/0
+Rizal(config-if)# ip address 172.16.48.1 255.255.255.224
+Rizal(config-if)# no shutdown
+Rizal(config-if)# exit</div>
+    </div>
+  </div>
+
+  <div class="as">
+    <div class="as-t">TASK 5 — Static Routes on Bonifacio</div>
+    <div class="ab">
+      <div class="adev">Bonifacio — reach all remote networks via Aguinaldo (172.16.0.2)</div>
+      <div class="acode">Bonifacio(config)# ip route 172.16.40.0 255.255.255.224 172.16.0.2
+Bonifacio(config)# ip route 172.16.48.0 255.255.255.224 172.16.0.2
+Bonifacio(config)# ip route 172.16.32.0 255.255.255.240 172.16.0.2</div>
+    </div>
+  </div>
+
+  <div class="as">
+    <div class="as-t">TASK 6 — Default Route on Rizal</div>
+    <div class="ab">
+      <div class="adev">Rizal — gateway of last resort to Aguinaldo</div>
+      <div class="acode">Rizal(config)# ip route 0.0.0.0 0.0.0.0 172.16.8.1</div>
+    </div>
+  </div>
+
+  <div class="as">
+    <div class="as-t">TASK 7 — RIPv1 on Aguinaldo</div>
+    <div class="ab">
+      <div class="adev">Aguinaldo — RIPv1 is classful; 172.16.x.x all summarize to Class B</div>
+      <div class="acode">Aguinaldo(config)# router rip
+Aguinaldo(config-router)# network 172.16.0.0
+Aguinaldo(config-router)# network 172.16.8.0
+Aguinaldo(config-router)# network 172.16.32.0
+Aguinaldo(config-router)# exit
+! RIPv1 auto-summarizes all 172.16.x.x → distributes to neighbors</div>
+    </div>
+  </div>
+
+  <div class="as">
+    <div class="as-t">TASK 8 — DHCP Pool on Bonifacio for LAN-B1</div>
+    <div class="ab">
+      <div class="adev">Bonifacio</div>
+      <div class="acode">Bonifacio(config)# ip dhcp excluded-address 172.16.16.1 172.16.16.5
+Bonifacio(config)# ip dhcp pool LANB1
+Bonifacio(dhcp-config)# network 172.16.16.0 255.255.255.224
+Bonifacio(dhcp-config)# default-router 172.16.16.1
+Bonifacio(dhcp-config)# dns-server 8.8.8.8
+Bonifacio(dhcp-config)# exit</div>
+    </div>
+  </div>
+
+  <div class="as">
+    <div class="as-t">TASK 9 — PC0 &amp; PC1: Enable DHCP</div>
+    <div class="ab"><div class="acode">In Packet Tracer → click PC0 → Desktop tab → IP Configuration
+  ● Select: DHCP  (radio button)
+  PC0 receives: 172.16.16.6 | 255.255.255.224 | GW 172.16.16.1
+  PC1 receives: 172.16.16.7 | 255.255.255.224 | GW 172.16.16.1</div></div>
+  </div>
+
+  <div class="as">
+    <div class="as-t">TASK 10 — Manual IPs for PC2–PC8</div>
+    <div class="ab"><div class="acode">PC2  → 172.16.24.2  / 255.255.255.224  GW 172.16.24.1
+PC3  → 172.16.24.3  / 255.255.255.224  GW 172.16.24.1
+PC4  → 172.16.32.2  / 255.255.255.240  GW 172.16.32.1
+PC5  → 172.16.40.2  / 255.255.255.224  GW 172.16.40.1
+PC6  → 172.16.40.3  / 255.255.255.224  GW 172.16.40.1
+PC7  → 172.16.48.2  / 255.255.255.224  GW 172.16.48.1
+PC8  → 172.16.48.3  / 255.255.255.224  GW 172.16.48.1</div></div>
+  </div>
+
+  <div class="as">
+    <div class="as-t">TASK 11 — Verification</div>
+    <div class="ab"><div class="acode">Bonifacio# show ip route
+  S  172.16.40.0/27 [1/0] via 172.16.0.2
+  S  172.16.48.0/27 [1/0] via 172.16.0.2
+  S  172.16.32.0/28 [1/0] via 172.16.0.2
+  C  172.16.0.0/30  directly connected, Serial2/0
+  C  172.16.16.0/27 directly connected, FastEthernet0/0
+  C  172.16.24.0/27 directly connected, FastEthernet1/0
+
+Aguinaldo# show ip route
+  R  172.16.0.0/8   [120/1] via 172.16.0.1, 00:00:27, Serial2/0
+  C  172.16.0.0/30  directly connected, Serial2/0
+  C  172.16.8.0/30  directly connected, Serial3/0
+  C  172.16.32.0/28 directly connected, FastEthernet0/0
+
+Rizal# show ip route
+  S* 0.0.0.0/0      [1/0] via 172.16.8.1
+  C  172.16.8.0/30  directly connected, Serial3/0
+  C  172.16.40.0/27 directly connected, FastEthernet0/0
+  C  172.16.48.0/27 directly connected, FastEthernet1/0
+
+Also run: show ip dhcp binding   (on Bonifacio)
+          show ip protocols      (on Aguinaldo → confirms RIPv1)</div></div>
+  </div>
+
+  <div class="as">
+    <div class="as-t">TASK 12 — Save Configurations</div>
+    <div class="ab"><div class="acode">Bonifacio# copy running-config startup-config
+Aguinaldo# copy running-config startup-config
+Rizal# copy running-config startup-config
+  Destination filename [startup-config]? [Enter]
+  Building configuration... [OK]</div></div>
+  </div>
+
+  <button class="close-btn" onclick="closeModal()">✓ CLOSE</button>
+</div>
+</div>
+
+<script>
+// ═══════════════ TOPOLOGY DATA ═══════════════
+const DEVICES = [
+  // CENTER HUB
+  { id:'Aguinaldo', type:'router', x:50, y:16,
+    sub:'Se2/0: 172.16.0.2 | Se3/0: 172.16.8.1\nFa0/0: 172.16.32.1', dce:true,
+    pw:'Telnet: TELNET02 | Enable: CCNA2025' },
+
+  // LEFT — Bonifacio branch
+  { id:'Bonifacio', type:'router', x:18, y:36,
+    sub:'Se2/0: 172.16.0.1\nFa0/0: 172.16.16.1  Fa1/0: 172.16.24.1',
+    pw:'Telnet: TELNET01 | Enable: CCNA2025' },
+  { id:'SW-B1', type:'switch', x:9,  y:57, sub:'LAN-B1\n172.16.16.0/27' },
+  { id:'SW-B2', type:'switch', x:27, y:57, sub:'LAN-B2\n172.16.24.0/27' },
+  { id:'PC0', type:'pc', x:4,  y:78, sub:'DHCP\n172.16.16.6' },
+  { id:'PC1', type:'pc', x:13, y:78, sub:'DHCP\n172.16.16.7' },
+  { id:'PC2', type:'pc', x:22, y:78, sub:'172.16.24.2' },
+  { id:'PC3', type:'pc', x:31, y:78, sub:'172.16.24.3' },
+
+  // CENTER LAN
+  { id:'PC4', type:'pc', x:50, y:40, sub:'172.16.32.2' },
+
+  // RIGHT — Rizal branch
+  { id:'Rizal', type:'router', x:82, y:36,
+    sub:'Se3/0: 172.16.8.2\nFa0/0: 172.16.40.1  Fa1/0: 172.16.48.1',
+    pw:'Telnet: TELNET03 | Enable: CCNA2025' },
+  { id:'SW-R1', type:'switch', x:73, y:57, sub:'LAN-R1\n172.16.40.0/27' },
+  { id:'SW-R2', type:'switch', x:91, y:57, sub:'LAN-R2\n172.16.48.0/27' },
+  { id:'PC5', type:'pc', x:67, y:78, sub:'172.16.40.2' },
+  { id:'PC6', type:'pc', x:76, y:78, sub:'172.16.40.3' },
+  { id:'PC7', type:'pc', x:85, y:78, sub:'172.16.48.2' },
+  { id:'PC8', type:'pc', x:94, y:78, sub:'172.16.48.3' },
+];
+
+const LINKS = [
+  { a:'Bonifacio', b:'Aguinaldo', style:'serial', label:'Se2/0 ↔ Se2/0 | 172.16.0.0/30 | DCE@Aguinaldo' },
+  { a:'Aguinaldo',  b:'Rizal',    style:'serial', label:'Se3/0 ↔ Se3/0 | 172.16.8.0/30 | DCE@Aguinaldo' },
+  { a:'Aguinaldo',  b:'PC4',      style:'eth',    label:'Fa0/0 → 172.16.32.0/28' },
+  { a:'Bonifacio',  b:'SW-B1',    style:'eth',    label:'Fa0/0' },
+  { a:'Bonifacio',  b:'SW-B2',    style:'eth',    label:'Fa1/0' },
+  { a:'SW-B1', b:'PC0', style:'eth', label:'' },
+  { a:'SW-B1', b:'PC1', style:'eth', label:'' },
+  { a:'SW-B2', b:'PC2', style:'eth', label:'' },
+  { a:'SW-B2', b:'PC3', style:'eth', label:'' },
+  { a:'Rizal',   b:'SW-R1', style:'eth', label:'Fa0/0' },
+  { a:'Rizal',   b:'SW-R2', style:'eth', label:'Fa1/0' },
+  { a:'SW-R1', b:'PC5', style:'eth', label:'' },
+  { a:'SW-R1', b:'PC6', style:'eth', label:'' },
+  { a:'SW-R2', b:'PC7', style:'eth', label:'' },
+  { a:'SW-R2', b:'PC8', style:'eth', label:'' },
+];
+
+// ═══════════════ CLI STATE ═══════════════
+const DS = {};
+DEVICES.forEach(d => {
+  DS[d.id] = { mode:'user', hostname:d.id, hist:[], ifCtx:null };
+});
+let sel = null;
+const done = new Array(12).fill(false);
+
+// ═══════════════ TOPOLOGY RENDER ═══════════════
+function rSVG(type) {
+  if (type==='router') return `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="13" stroke="#00c8ff" stroke-width="1.5" fill="#0d2035"/><ellipse cx="20" cy="20" rx="13" ry="6" stroke="#00c8ff55" stroke-width="1" fill="none"/><line x1="7" y1="20" x2="33" y2="20" stroke="#00c8ff44" stroke-width="1"/><line x1="20" y1="7" x2="20" y2="33" stroke="#00c8ff44" stroke-width="1"/><circle cx="20" cy="20" r="2.5" fill="#00c8ff"/></svg>`;
+  if (type==='switch') return `<svg viewBox="0 0 52 28"><rect x="1" y="1" width="50" height="26" rx="3" stroke="#39ff85" stroke-width="1.5" fill="#0d2a1a"/><rect x="6" y="7" width="5" height="7" rx="1" fill="#39ff85"/><rect x="14" y="7" width="5" height="7" rx="1" fill="#39ff8544"/><rect x="22" y="7" width="5" height="7" rx="1" fill="#39ff8544"/><rect x="30" y="7" width="5" height="7" rx="1" fill="#39ff8544"/><rect x="38" y="7" width="5" height="7" rx="1" fill="#39ff8544"/><line x1="6" y1="20" x2="46" y2="20" stroke="#39ff8522" stroke-width="1"/></svg>`;
+  return `<svg viewBox="0 0 42 36"><rect x="3" y="2" width="36" height="22" rx="2" stroke="#7a7aaa" stroke-width="1.5" fill="#1a1a2e"/><rect x="7" y="5" width="28" height="16" fill="#0a0a1e" rx="1"/><line x1="18" y1="24" x2="24" y2="24" stroke="#7a7aaa" stroke-width="1"/><rect x="13" y="27" width="16" height="5" rx="1" stroke="#7a7aaa" stroke-width="1" fill="#1a1a2e"/></svg>`;
+}
+
+function renderTopo() {
+  const area = document.getElementById('topo');
+  const svg  = document.getElementById('topoSVG');
+  const W = area.offsetWidth, H = area.offsetHeight;
+  area.querySelectorAll('.node,.llbl').forEach(n=>n.remove());
+
+  // links
+  let svgH = '';
+  LINKS.forEach(lnk => {
+    const da=DEVICES.find(d=>d.id===lnk.a), db=DEVICES.find(d=>d.id===lnk.b);
+    const x1=da.x/100*W, y1=da.y/100*H, x2=db.x/100*W, y2=db.y/100*H;
+    const ser = lnk.style==='serial';
+    svgH += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${ser?'#ff7c3566':'#39ff8544'}" stroke-width="${ser?2.2:1.4}" stroke-dasharray="${ser?'9,5':'0'}"/>`;
+    if (lnk.label) {
+      const mx=(x1+x2)/2, my=(y1+y2)/2;
+      const el=document.createElement('div');
+      el.className='llbl';
+      el.style.cssText=`left:${mx}px;top:${my}px;transform:translate(-50%,-50%)`;
+      el.innerHTML=lnk.label.replace(/\|/g,'<br>');
+      area.appendChild(el);
+    }
+  });
+  svg.innerHTML = svgH;
+
+  // nodes
+  DEVICES.forEach(d => {
+    const el = document.createElement('div');
+    el.className='node'; el.id='nd-'+d.id;
+    const pw=d.x/100*W, ph=d.y/100*H;
+    const offX = d.type==='router'?27:d.type==='switch'?26:21;
+    const offY = d.type==='router'?27:d.type==='switch'?14:17;
+    el.style.cssText=`left:${pw-offX}px;top:${ph-offY}px;`;
+    el.onclick=()=>selectDev(d.id);
+
+    const cls = d.type==='router'?'router':d.type==='switch'?'switch':'pc';
+    const hnClass = d.type==='switch'?'sw':d.type==='pc'?'pc-c':'';
+    const subs = (d.sub||'').split('\n').map(s=>`<span class="dip">${s}</span>`).join('');
+    const dceTag = d.dce ? `<span class="dce-lbl">◆ DCE ◆</span><br>` : '';
+    const pwTag  = d.pw  ? `<span class="pw-lbl">${d.pw.split('|')[0].trim()}</span>` : '';
+
+    el.innerHTML=`<div class="dicon ${cls}">${rSVG(d.type)}</div>
+    <div class="dlabel">${dceTag}<span class="hn ${hnClass}">${d.id}</span><br>${subs}${pwTag?'<br>'+pwTag:''}</div>`;
+    area.appendChild(el);
+  });
+}
+
+// ═══════════════ DEVICE SELECT ═══════════════
+function selectDev(id) {
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('sel'));
+  document.getElementById('nd-'+id).classList.add('sel');
+  sel = id;
+  document.getElementById('nodev').style.display='none';
+  const box=document.getElementById('cliBox');
+  box.style.display='flex'; box.style.flexDirection='column'; box.style.flex='1'; box.style.overflow='hidden';
+  document.getElementById('cliName').textContent = id+' — CLI Terminal';
+  const d=DEVICES.find(x=>x.id===id);
+  document.getElementById('cliHint').textContent = d.type==='pc'?'PC commands':'Cisco IOS';
+  document.getElementById('cliPrmpt').textContent = prmpt(id);
+  renderOut(id);
+  document.getElementById('cliInp').focus();
+}
+
+function prmpt(id) {
+  const s=DS[id], h=s.hostname||id;
+  return s.mode==='user'?h+'>':s.mode==='enable'?h+'#':s.mode==='config'?h+'(config)#':s.mode==='if'?h+'(config-if)#':s.mode==='dhcp'?h+'(dhcp-config)#':s.mode==='router'?h+'(config-router)#':s.mode==='line'?h+'(config-line)#':h+'>';
+}
+
+function renderOut(id) {
+  const el=document.getElementById('cliOut'), s=DS[id];
+  el.innerHTML = s.hist.length
+    ? s.hist.map(h=>`<span class="${h.c}">${h.t}</span>`).join('\n')
+    : `<span class="li">Cisco IOS — ${id} ready\nType 'enable' to enter privileged mode.\n</span>`;
+  el.scrollTop=el.scrollHeight;
+}
+
+// ═══════════════ CLI ENGINE ═══════════════
+document.getElementById('cliInp').addEventListener('keydown',function(e){
+  if(e.key!=='Enter') return;
+  const cmd=this.value.trim(); this.value='';
+  if(!sel) return;
+  runCmd(sel,cmd);
+});
+
+function push(id,p,cmd,lines){
+  const s=DS[id];
+  s.hist.push({c:'lp',t:p+' '+cmd});
+  lines.forEach(l=>s.hist.push(l));
+  renderOut(id);
+  document.getElementById('cliPrmpt').textContent=prmpt(id);
+}
+const li=t=>({c:'li',t}), lo=t=>({c:'lo',t}), le=t=>({c:'le',t}), ls=t=>({c:'ls',t}), lw=t=>({c:'lw',t});
+
+function runCmd(id,cmd){
+  const s=DS[id], p=prmpt(id), c=cmd.toLowerCase().trim();
+  const d=DEVICES.find(x=>x.id===id);
+  if(!cmd){push(id,p,'',[]);return;}
+
+  // PC shortcut
+  if(d.type==='pc'){
+    if(c==='ipconfig'||c==='ipconfig /all') push(id,p,cmd,[lo(pcCfg(id))]);
+    else if(c.includes('dhcp')){markT(8);push(id,p,cmd,[ls('% DHCP enabled. IP obtained from server.')]);}
+    else if(c.startsWith('ip address')){markT(9);push(id,p,cmd,[ls('% Static IP configured.')]);}
+    else push(id,p,cmd,[li(`[PC] '${cmd}' acknowledged.`)]);
+    return;
+  }
+
+  if(s.mode==='user'){
+    if(c==='enable'){s.mode='enable';push(id,p,cmd,[]);}
+    else push(id,p,cmd,[le(`% Unknown command: '${cmd}'`)]);
+    return;
+  }
+
+  if(s.mode==='enable'){
+    if(c==='configure terminal'||c==='conf t'){s.mode='config';push(id,p,cmd,[li('Enter configuration commands, one per line. End with CNTL/Z.')]);}
+    else if(c==='show ip route'||c==='sh ip ro'){markT(10);push(id,p,cmd,[lo(fRoute(id))]);}
+    else if(c==='show ip protocols'||c==='sh ip prot'){push(id,p,cmd,[lo(fProto(id))]);}
+    else if(c==='show ip dhcp binding'||c==='sh ip dhcp bind'){push(id,p,cmd,[lo(fDHCP(id))]);}
+    else if(c==='show ip interface brief'||c==='sh ip int br'){push(id,p,cmd,[lo(fIntBrief(id))]);}
+    else if(c==='show running-config'||c==='show run'||c==='sh run'){push(id,p,cmd,[lo(fRun(id))]);}
+    else if(c.startsWith('copy run')||c==='wr'){markT(11);push(id,p,cmd,[lo('Destination filename [startup-config]?'),ls('Building configuration... [OK]')]);}
+    else if(c==='disable'){s.mode='user';push(id,p,cmd,[]);}
+    else push(id,p,cmd,[le(`% Invalid input: '${cmd}'`)]);
+    return;
+  }
+
+  if(s.mode==='config'){
+    if(c.startsWith('hostname ')){markT(0);s.hostname=cmd.split(' ')[1];push(id,p,cmd,[]);}
+    else if(c.startsWith('enable password')||c.startsWith('enable secret')){markT(1);push(id,p,cmd,[ls('% Enable password set.')]);}
+    else if(c.startsWith('line vty')){s.mode='line';push(id,p,cmd,[]);}
+    else if(c.startsWith('interface ')){s.mode='if';s.ifCtx=cmd.split(' ').slice(1).join(' ');push(id,p,cmd,[]);}
+    else if(c.startsWith('ip route')){
+      if(c.includes('0.0.0.0 0.0.0.0'))markT(5); else markT(4);
+      push(id,p,cmd,[ls('% Static route added.')]);
+    }
+    else if(c.startsWith('ip dhcp excluded')){markT(7);push(id,p,cmd,[ls('% DHCP excluded range set.')]);}
+    else if(c.startsWith('ip dhcp pool')){s.mode='dhcp';push(id,p,cmd,[li('Entering DHCP pool config mode.')]);}
+    else if(c.startsWith('router rip')){s.mode='router';push(id,p,cmd,[]);}
+    else if(c==='exit'||c==='end'){s.mode='enable';push(id,p,cmd,[]);}
+    else push(id,p,cmd,[le(`% Unrecognized: '${cmd}'`)]);
+    return;
+  }
+
+  if(s.mode==='if'){
+    if(c.startsWith('ip address')){markT(2);push(id,p,cmd,[ls('% IP address configured.')]);}
+    else if(c.startsWith('clock rate')){markT(3);push(id,p,cmd,[ls('% Clock rate set (DCE).')]);}
+    else if(c==='no shutdown'){push(id,p,cmd,[lo(`%LINK-5-CHANGED: Interface ${s.ifCtx}, changed state to up`),ls(`%LINEPROTO-5-UPDOWN: Line protocol on Interface ${s.ifCtx}, changed state to up`)]);}
+    else if(c==='shutdown'){push(id,p,cmd,[lo(`%LINK-5-CHANGED: Interface ${s.ifCtx}, changed state to administratively down`)]);}
+    else if(c==='exit'){s.mode='config';s.ifCtx=null;push(id,p,cmd,[]);}
+    else if(c==='end'){s.mode='enable';s.ifCtx=null;push(id,p,cmd,[]);}
+    else push(id,p,cmd,[le(`% Invalid: '${cmd}'`)]);
+    return;
+  }
+
+  if(s.mode==='line'){
+    if(c.startsWith('password')){markT(1);push(id,p,cmd,[ls('% Telnet password configured.')]);}
+    else if(c==='login'){push(id,p,cmd,[ls('% Login authentication required.')]);}
+    else if(c==='exit'||c==='end'){s.mode='config';push(id,p,cmd,[]);}
+    else push(id,p,cmd,[li(`% '${cmd}' accepted.`)]);
+    return;
+  }
+
+  if(s.mode==='dhcp'){
+    if(c.startsWith('network ')){push(id,p,cmd,[ls('% DHCP pool network set.')]);}
+    else if(c.startsWith('default-router')){markT(7);push(id,p,cmd,[ls('% Default gateway set for DHCP pool.')]);}
+    else if(c.startsWith('dns-server')){push(id,p,cmd,[ls('% DNS server configured.')]);}
+    else if(c==='exit'||c==='end'){s.mode='config';push(id,p,cmd,[]);}
+    else push(id,p,cmd,[le(`% Invalid DHCP command: '${cmd}'`)]);
+    return;
+  }
+
+  if(s.mode==='router'){
+    if(c.startsWith('network ')){markT(6);push(id,p,cmd,[ls('% Network added to RIP process.')]);}
+    else if(c.startsWith('version')){push(id,p,cmd,[lo('% RIP version configured.')]);}
+    else if(c==='no auto-summary'){push(id,p,cmd,[lw('% Note: RIPv1 does not support VLSM; no auto-summary has no effect on v1.')]);}
+    else if(c==='exit'||c==='end'){s.mode='config';push(id,p,cmd,[]);}
+    else push(id,p,cmd,[le(`% Invalid: '${cmd}'`)]);
+    return;
+  }
+}
+
+// ═══════════════ FAKE OUTPUTS ═══════════════
+function fRoute(id){
+  return {
+    Bonifacio:`Codes: C - connected, S - static\n\nS    172.16.40.0/27 [1/0] via 172.16.0.2\nS    172.16.48.0/27 [1/0] via 172.16.0.2\nS    172.16.32.0/28 [1/0] via 172.16.0.2\nC    172.16.0.0/30  is directly connected, Serial2/0\nC    172.16.16.0/27 is directly connected, FastEthernet0/0\nC    172.16.24.0/27 is directly connected, FastEthernet1/0`,
+    Aguinaldo:`Codes: C - connected, R - RIP\n\nR    172.16.0.0/8   [120/1] via 172.16.0.1, 00:00:12, Serial2/0\nC    172.16.0.0/30  is directly connected, Serial2/0\nC    172.16.8.0/30  is directly connected, Serial3/0\nC    172.16.32.0/28 is directly connected, FastEthernet0/0`,
+    Rizal:`Codes: C - connected, S - static\n\nS*   0.0.0.0/0      [1/0] via 172.16.8.1\nC    172.16.8.0/30  is directly connected, Serial3/0\nC    172.16.40.0/27 is directly connected, FastEthernet0/0\nC    172.16.48.0/27 is directly connected, FastEthernet1/0`,
+  }[id]||'% Routing table empty — configure interfaces first.';
+}
+function fProto(id){
+  return id==='Aguinaldo'
+    ?`Routing Protocol is "rip"\n  Sending updates every 30 seconds, next due in 18 sec\n  Maximum path: 4\n  Routing for Networks:\n    172.16.0.0`
+    :'% No routing protocols configured.';
+}
+function fDHCP(id){
+  return id==='Bonifacio'
+    ?`IP address       Client-ID                    Lease expiration\n172.16.16.6      0100.5056.be01.23            1 day\n172.16.16.7      0100.5056.be04.56            1 day`
+    :'% No DHCP bindings found.';
+}
+function fIntBrief(id){
+  return {
+    Bonifacio:`Interface          IP-Address       OK? Method  Status                  Protocol\nSerial2/0          172.16.0.1       YES manual  up                      up\nFastEthernet0/0    172.16.16.1      YES manual  up                      up\nFastEthernet1/0    172.16.24.1      YES manual  up                      up`,
+    Aguinaldo:`Interface          IP-Address       OK? Method  Status                  Protocol\nSerial2/0          172.16.0.2       YES manual  up                      up\nSerial3/0          172.16.8.1       YES manual  up                      up\nFastEthernet0/0    172.16.32.1      YES manual  up                      up`,
+    Rizal:`Interface          IP-Address       OK? Method  Status                  Protocol\nSerial3/0          172.16.8.2       YES manual  up                      up\nFastEthernet0/0    172.16.40.1      YES manual  up                      up\nFastEthernet1/0    172.16.48.1      YES manual  up                      up`,
+  }[id]||'% No interface data.';
+}
+function fRun(id){return `!\nhostname ${DS[id].hostname||id}\nenable password CCNA2025\n!\n! Interface and routing configurations\n! (abbreviated)\n`;}
+function pcCfg(id){
+  return {
+    PC0:`Ethernet0:\n  IPv4 Address . . : 172.16.16.6 (DHCP)\n  Subnet Mask  . . : 255.255.255.224\n  Default Gateway  : 172.16.16.1`,
+    PC1:`Ethernet0:\n  IPv4 Address . . : 172.16.16.7 (DHCP)\n  Subnet Mask  . . : 255.255.255.224\n  Default Gateway  : 172.16.16.1`,
+    PC2:`Ethernet0:\n  IPv4 Address . . : 172.16.24.2\n  Subnet Mask  . . : 255.255.255.224\n  Default Gateway  : 172.16.24.1`,
+    PC3:`Ethernet0:\n  IPv4 Address . . : 172.16.24.3\n  Subnet Mask  . . : 255.255.255.224\n  Default Gateway  : 172.16.24.1`,
+    PC4:`Ethernet0:\n  IPv4 Address . . : 172.16.32.2\n  Subnet Mask  . . : 255.255.255.240\n  Default Gateway  : 172.16.32.1`,
+    PC5:`Ethernet0:\n  IPv4 Address . . : 172.16.40.2\n  Subnet Mask  . . : 255.255.255.224\n  Default Gateway  : 172.16.40.1`,
+    PC6:`Ethernet0:\n  IPv4 Address . . : 172.16.40.3\n  Subnet Mask  . . : 255.255.255.224\n  Default Gateway  : 172.16.40.1`,
+    PC7:`Ethernet0:\n  IPv4 Address . . : 172.16.48.2\n  Subnet Mask  . . : 255.255.255.224\n  Default Gateway  : 172.16.48.1`,
+    PC8:`Ethernet0:\n  IPv4 Address . . : 172.16.48.3\n  Subnet Mask  . . : 255.255.255.224\n  Default Gateway  : 172.16.48.1`,
+  }[id]||'% No IP configuration.';
+}
+
+// ═══════════════ TASKS ═══════════════
+function markT(i){
+  if(done[i]) return;
+  done[i]=true;
+  const el=document.getElementById('c'+i);
+  el.classList.add('done'); el.textContent='✓';
+  document.getElementById('prog').textContent=done.filter(Boolean).length+' / 12 tasks';
+}
+
+// ═══════════════ MODAL ═══════════════
+function openModal(){document.getElementById('modal').classList.add('show');}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+
+window.addEventListener('load',renderTopo);
+window.addEventListener('resize',renderTopo);
+</script>
+</body>
+</html>

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Networking Final Exam</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d; --border: #30363d;
+      --orange: #f0883e; --orange2: #ffa657; --green: #3fb950; --green2: #56d364;
+      --blue: #58a6ff; --blue2: #79c0ff; --purple: #bc8cff; --red: #f85149;
+      --text: #e6edf3; --muted: #8b949e; --card: #161b22;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14.5px; line-height: 1.7; min-height: 100vh; }
+
+    /* HERO */
+    .hero { padding: 48px 40px 38px; background: linear-gradient(180deg,#0d1117 0%,#161b22 100%); border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+    .hero::before { content:''; position:absolute; top:-60px; right:-80px; width:400px; height:400px; border-radius:50%; background:radial-gradient(circle,rgba(240,136,62,.08) 0%,transparent 70%); pointer-events:none; }
+    .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+    .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background:rgba(240,136,62,.1); border:1px solid rgba(240,136,62,.3); color:var(--orange2); font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:5px 14px; border-radius:20px; margin-bottom:18px; }
+    .hero h1 { font-size:clamp(1.7rem,4vw,2.6rem); font-weight:800; line-height:1.15; margin-bottom:10px; }
+    .hero h1 span { color:var(--orange2); }
+    .hero-sub { color:var(--muted); font-size:13.5px; font-weight:300; }
+    .hero-pills { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+    .pill { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:7px 16px; font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+    .pill strong { color:var(--blue2); font-family:'JetBrains Mono',monospace; font-weight:700; }
+
+    /* TOPBAR */
+    .topbar { background:rgba(13,17,23,.95); border-bottom:1px solid var(--border); padding:0 32px; backdrop-filter:blur(12px); display:flex; align-items:center; gap:12px; }
+    .back-btn { background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); font-family:'Plus Jakarta Sans',sans-serif; font-size:12.5px; font-weight:600; padding:14px 4px; cursor:pointer; transition:all .15s; text-transform:uppercase; letter-spacing:.5px; }
+    .back-btn:hover { color:var(--orange2); border-bottom-color:var(--orange); }
+    .sep { color:var(--border); padding:14px 0; font-size:12px; }
+
+    /* STICKY PROGRESS */
+    .sticky-bar { background:var(--bg2); border-bottom:1px solid var(--border); padding:10px 32px; position:sticky; top:0; z-index:50; backdrop-filter:blur(8px); }
+    .sticky-inner { max-width:900px; margin:0 auto; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .prog-label { font-size:12px; color:var(--muted); white-space:nowrap; }
+    .prog-score { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--orange2); font-weight:700; white-space:nowrap; }
+    .prog-track { flex:1; background:var(--border); border-radius:10px; height:5px; min-width:80px; }
+    .prog-fill { background:linear-gradient(90deg,var(--orange),var(--green)); height:100%; border-radius:10px; transition:width .4s ease; width:0%; }
+
+    /* CONTAINER */
+    .container { max-width:900px; margin:0 auto; padding:32px 24px 80px; }
+
+    /* SECTION DIVIDER */
+    .divider { display:flex; align-items:center; gap:14px; margin:36px 0 20px; }
+    .divider-line { flex:1; height:1px; background:var(--border); }
+    .divider-label { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:var(--orange2); text-transform:uppercase; letter-spacing:2px; white-space:nowrap; background:rgba(240,136,62,.1); border:1px solid rgba(240,136,62,.25); padding:4px 14px; border-radius:20px; }
+
+    /* QUESTION CARD */
+    .qcard { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:22px 24px; margin-bottom:14px; transition:border-color .2s; }
+    .qcard.done-correct { border-color:rgba(63,185,80,.3); }
+    .qcard.done-wrong   { border-color:rgba(248,81,73,.3); }
+    .qnum { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:var(--orange); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .qtag { font-size:9px; padding:2px 8px; border-radius:4px; font-weight:700; letter-spacing:.5px; }
+    .tag-static { background:rgba(240,136,62,.12); color:var(--orange2); border:1px solid rgba(240,136,62,.25); }
+    .tag-vlsm   { background:rgba(248,81,73,.12);  color:#ff7b72;        border:1px solid rgba(248,81,73,.25); }
+    .tag-dv     { background:rgba(188,140,255,.12); color:var(--purple);  border:1px solid rgba(188,140,255,.25); }
+    .tag-rip    { background:rgba(63,185,80,.12);   color:var(--green2);  border:1px solid rgba(63,185,80,.25); }
+    .tag-dhcp   { background:rgba(88,166,255,.12);  color:var(--blue2);   border:1px solid rgba(88,166,255,.25); }
+    .qtext { font-weight:700; font-size:14px; margin-bottom:14px; line-height:1.55; }
+    .qtext code { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--green2); background:rgba(63,185,80,.08); padding:1px 6px; border-radius:4px; }
+    .qopts { display:flex; flex-direction:column; gap:7px; }
+    .qopt { background:rgba(255,255,255,.025); border:1px solid var(--border); border-radius:8px; padding:9px 15px; cursor:pointer; font-size:13.5px; color:var(--text); transition:all .15s; text-align:left; font-family:'Plus Jakarta Sans',sans-serif; width:100%; }
+    .qopt code { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--green2); background:rgba(63,185,80,.08); padding:1px 5px; border-radius:3px; }
+    .qopt:hover:not(.disabled) { background:rgba(240,136,62,.07); border-color:rgba(240,136,62,.35); }
+    .qopt.correct  { background:rgba(63,185,80,.12);  border-color:var(--green);  color:var(--green2); pointer-events:none; }
+    .qopt.wrong    { background:rgba(248,81,73,.08);   border-color:var(--red);    color:#ff7b72;        pointer-events:none; }
+    .qopt.disabled { pointer-events:none; }
+    .qfeedback { display:none; margin-top:11px; font-size:13px; color:var(--muted); background:rgba(255,255,255,.03); border-left:3px solid var(--orange); border-radius:0 7px 7px 0; padding:10px 14px; line-height:1.6; }
+    .qfeedback.show { display:block; }
+    .qfeedback code { font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--green2); background:rgba(63,185,80,.08); padding:1px 5px; border-radius:3px; }
+
+    /* RESULT */
+    .result-box { display:none; text-align:center; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:48px 28px; margin-top:36px; }
+    .result-box.show { display:block; }
+    .result-score { font-family:'JetBrains Mono',monospace; font-size:4rem; font-weight:700; color:var(--orange2); }
+    .result-sub { font-size:13px; color:var(--muted); margin-top:6px; }
+    .result-grade { font-size:1.4rem; font-weight:800; margin-top:16px; }
+    .breakdown { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin-top:22px; }
+    .bd-pill { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:8px 18px; font-size:12.5px; color:var(--muted); }
+    .bd-pill strong { font-family:'JetBrains Mono',monospace; color:var(--text); }
+    .reset-btn { background:rgba(240,136,62,.12); border:1px solid rgba(240,136,62,.4); color:var(--orange2); padding:11px 32px; border-radius:8px; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; margin-top:24px; font-size:13.5px; transition:all .2s; }
+    .reset-btn:hover { background:rgba(240,136,62,.22); }
+
+    @media(max-width:600px){
+      .hero{padding:32px 18px 28px;}
+      .container{padding:20px 14px 60px;}
+      .topbar,.sticky-bar{padding:0 14px;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">📝 Final Exam</div>
+    <h1>Networking Exam —<br><span>Static Routing to DHCP</span></h1>
+    <p class="hero-sub">Objective type · Choose the best answer for each item · No time limit</p>
+    <div class="hero-pills">
+      <div class="pill"><strong>50</strong> Items</div>
+      <div class="pill"><strong>5</strong> Topics</div>
+      <div class="pill"><strong>Static Routing</strong></div>
+      <div class="pill"><strong>VLSM</strong></div>
+      <div class="pill"><strong>Distance Vector</strong></div>
+      <div class="pill"><strong>RIPv1</strong></div>
+      <div class="pill"><strong>DHCP</strong></div>
+    </div>
+  </div>
+</div>
+
+<div class="topbar">
+  <button class="back-btn" onclick="window.location.href='index.html'">← Back to Lesson</button>
+  <span class="sep">|</span>
+  <span style="font-size:12px;color:var(--muted);padding:14px 0;">Networking Final Exam</span>
+</div>
+
+<div class="sticky-bar">
+  <div class="sticky-inner">
+    <span class="prog-label" id="prog-txt">0 / 50 answered</span>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    <span class="prog-score" id="score-live">Score: 0 / 50</span>
+  </div>
+</div>
+
+<div class="container">
+  <div id="exam-container"></div>
+  <div class="result-box" id="result-box">
+    <div class="result-score" id="res-score">0/50</div>
+    <div class="result-sub">Final Score</div>
+    <div class="result-grade" id="res-grade"></div>
+    <div class="breakdown" id="res-breakdown"></div>
+    <button class="reset-btn" onclick="resetExam()">↺ Retake Exam</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+
+  // ── STATIC ROUTING (Q1–Q12) ────────────────────────────────────────────
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'Which IOS command is used to configure a static route?',
+    opts: [
+      '<code>ip static-route [network] [mask] [next-hop]</code>',
+      '<code>route add [network] [mask] [next-hop]</code>',
+      '<code>ip route [network] [mask] [next-hop]</code>',
+      '<code>static route [network] [mask] [next-hop]</code>'
+    ],
+    ans: 2,
+    exp: 'The correct command is <code>ip route [network] [mask] [next-hop-IP or exit-interface]</code>, entered in global configuration mode.'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'What is the administrative distance of a static route by default?',
+    opts: ['0', '1', '90', '120'],
+    ans: 1,
+    exp: 'Static routes have an administrative distance of 1 by default, making them highly trusted — only directly connected routes (AD=0) are more preferred.'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'In <code>show ip route</code> output, which letter code represents a static route?',
+    opts: ['C', 'R', 'S', 'D'],
+    ans: 2,
+    exp: '<strong>S</strong> = Static. C = Connected, R = RIP, D = EIGRP.'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'Which of the following is a valid reason to use static routing instead of a dynamic protocol?',
+    opts: [
+      'The network has hundreds of routers',
+      'The network topology changes frequently',
+      'The network is a small stub network with one path to the Internet',
+      'You want automatic route updates'
+    ],
+    ans: 2,
+    exp: 'Static routing is ideal for stub networks — small networks with only one exit point — because there is only one possible path so no dynamic calculation is needed.'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'What does <code>[1/0]</code> mean in the routing table entry <code>S 172.16.1.32 [1/0] via 10.10.10.2</code>?',
+    opts: [
+      'Interface 1, port 0',
+      'Administrative distance 1, metric 0',
+      'Hop count 1, bandwidth 0',
+      'Priority 1, cost 0'
+    ],
+    ans: 1,
+    exp: 'The notation [AD/metric] — Administrative Distance is 1 (static), metric is 0 (static routes have no metric cost).'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'You need to configure a default route on a router. Which command is correct?',
+    opts: [
+      '<code>ip route 0.0.0.0 255.255.255.255 192.168.1.1</code>',
+      '<code>ip route 0.0.0.0 0.0.0.0 192.168.1.1</code>',
+      '<code>ip default-route 192.168.1.1</code>',
+      '<code>ip route default 0.0.0.0 192.168.1.1</code>'
+    ],
+    ans: 1,
+    exp: 'A default route uses the quad-zero network and mask: <code>ip route 0.0.0.0 0.0.0.0 [next-hop]</code>. This matches any destination not found in the routing table.'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'Which command verifies static routes are in the routing table?',
+    opts: [
+      '<code>show interfaces</code>',
+      '<code>show running-config</code>',
+      '<code>show ip route</code>',
+      '<code>debug ip routing</code>'
+    ],
+    ans: 2,
+    exp: '<code>show ip route</code> displays the full routing table including all C (connected) and S (static) entries.'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'On which router interface must the <code>clock rate</code> command be set for a serial WAN link?',
+    opts: [
+      'The DTE (Data Terminal Equipment) side',
+      'Both sides simultaneously',
+      'The DCE (Data Communications Equipment) side',
+      'Either side — it does not matter'
+    ],
+    ans: 2,
+    exp: '<code>clock rate</code> is set only on the DCE side of a serial connection. The DCE provides the clocking signal to the DTE.'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'A static route is configured but traffic still cannot reach the remote network. What is the MOST likely first thing to check?',
+    opts: [
+      'Spanning tree configuration',
+      'Whether the directly connected interfaces are up/up',
+      'DHCP server availability',
+      'NAT translation table'
+    ],
+    ans: 1,
+    exp: 'Static routes depend on directly connected routes being active. If an interface is down, the static route through it is unreachable. Always verify interfaces are up/up with <code>show ip interface brief</code>.'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'What is a "floating static route"?',
+    opts: [
+      'A static route that changes its next-hop automatically',
+      'A static route with a higher administrative distance used as a backup',
+      'A default route pointing to 0.0.0.0',
+      'A route learned from a neighbor router'
+    ],
+    ans: 1,
+    exp: 'A floating static route is configured with a higher administrative distance than the primary route. It only appears in the routing table if the primary route fails.'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'Router TYK has a serial interface with IP 192.168.10.65/30. What is the next-hop IP that Router ENGG should use to reach TYK\'s LAN?',
+    opts: ['192.168.10.64', '192.168.10.66', '192.168.10.65', '192.168.10.1'],
+    ans: 2,
+    exp: 'ENGG uses TYK\'s serial interface IP (192.168.10.65) as the next-hop because that is the directly reachable neighbor address on the WAN link.'
+  },
+  {
+    topic: 'static', tag: 'Static Routing',
+    q: 'Which of the following correctly describes what happens when you type <code>copy running-config startup-config</code>?',
+    opts: [
+      'Startup-config in NVRAM is loaded into RAM',
+      'Running-config in RAM is saved to NVRAM as startup-config',
+      'IOS is reloaded from Flash',
+      'The router restarts with factory defaults'
+    ],
+    ans: 1,
+    exp: '<code>copy running-config startup-config</code> saves the active running-config from RAM into NVRAM as the startup-config, so changes survive a reboot.'
+  },
+
+  // ── VLSM (Q13–Q22) ─────────────────────────────────────────────────────
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'What does VLSM stand for?',
+    opts: [
+      'Variable Length Subnet Mask',
+      'Virtual LAN Subnet Management',
+      'Variable Link Subnet Method',
+      'Virtual Length Subnet Mask'
+    ],
+    ans: 0,
+    exp: 'VLSM = Variable Length Subnet Mask. It allows different subnets within the same network to use different mask lengths, enabling more efficient IP address allocation.'
+  },
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'You have the network 192.168.1.0/24. You need a subnet for exactly 50 hosts. Which subnet mask should you use?',
+    opts: ['/25 (255.255.255.128)', '/26 (255.255.255.192)', '/27 (255.255.255.224)', '/28 (255.255.255.240)'],
+    ans: 1,
+    exp: '/26 gives 64 addresses — 62 usable hosts. /25 gives 126 usable (wasteful). /27 gives only 30 usable (not enough).'
+  },
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'How many usable host addresses are in a /27 subnet?',
+    opts: ['14', '30', '32', '62'],
+    ans: 1,
+    exp: 'A /27 has 32 total addresses (2⁵). Subtract 2 (network + broadcast) = <strong>30 usable hosts</strong>.'
+  },
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'For a point-to-point WAN serial link between two routers, which subnet mask is most efficient?',
+    opts: ['/24', '/28', '/30', '/32'],
+    ans: 2,
+    exp: 'A /30 provides exactly 4 addresses (2 usable) — perfect for a point-to-point link that needs only 2 host IPs (one per router end).'
+  },
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'Given 192.168.10.64/27, what is the valid host range?',
+    opts: [
+      '192.168.10.65 – 192.168.10.94',
+      '192.168.10.64 – 192.168.10.95',
+      '192.168.10.65 – 192.168.10.96',
+      '192.168.10.64 – 192.168.10.94'
+    ],
+    ans: 0,
+    exp: 'Network = .64, Broadcast = .95. Valid hosts are .65 through .94 (30 hosts).'
+  },
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'What is the broadcast address of the subnet 192.168.10.32/27?',
+    opts: ['192.168.10.48', '192.168.10.62', '192.168.10.63', '192.168.10.64'],
+    ans: 2,
+    exp: 'Network .32 with /27 (block of 32): next network = .64, so broadcast = .63.'
+  },
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'You need to subnet 10.0.0.0/8 to support 500 hosts per subnet. Which mask do you use?',
+    opts: ['/22', '/23', '/24', '/25'],
+    ans: 1,
+    exp: '/23 gives 512 addresses, 510 usable. /24 gives 254 (not enough). /22 gives 1022 (more than needed — less efficient).'
+  },
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'IP: 192.168.1.130, Mask: 255.255.255.192. Which network does this host belong to?',
+    opts: ['192.168.1.0', '192.168.1.64', '192.168.1.128', '192.168.1.192'],
+    ans: 2,
+    exp: '/26 = block of 64. Networks: .0, .64, .128, .192. Host .130 falls in the 192.168.1.128 subnet.'
+  },
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'How many subnets can you create from 192.168.5.0/24 using a /27 mask?',
+    opts: ['4', '6', '8', '16'],
+    ans: 2,
+    exp: '/24 to /27 = 3 borrowed bits = 2³ = <strong>8 subnets</strong>, each with 30 usable hosts.'
+  },
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'What is the subnet mask in dotted-decimal for /29?',
+    opts: ['255.255.255.224', '255.255.255.240', '255.255.255.248', '255.255.255.252'],
+    ans: 2,
+    exp: '/29 = 8 bits borrowed from the 4th octet: 11111000 = 248. So the mask is 255.255.255.248.'
+  },
+  {
+    topic: 'vlsm', tag: 'VLSM',
+    q: 'Given the VLSM design, which network block should always be allocated FIRST?',
+    opts: [
+      'The smallest subnet needed',
+      'The subnet with the fewest hosts',
+      'The largest subnet needed',
+      'A /30 for WAN links'
+    ],
+    ans: 2,
+    exp: 'VLSM best practice: always allocate the <strong>largest subnet first</strong>, then progressively allocate smaller subnets. This prevents address space fragmentation.'
+  },
+
+  // ── DISTANCE VECTOR (Q23–Q32) ───────────────────────────────────────────
+  {
+    topic: 'dv', tag: 'Distance Vector',
+    q: 'What metric does RIP use to determine the best path?',
+    opts: ['Bandwidth', 'Delay', 'Hop count', 'Cost'],
+    ans: 2,
+    exp: 'RIP uses <strong>hop count</strong> as its sole metric. The maximum hop count is 15; a destination with 16 hops is considered unreachable.'
+  },
+  {
+    topic: 'dv', tag: 'Distance Vector',
+    q: 'Which of the following is a characteristic of a distance vector routing protocol?',
+    opts: [
+      'Routers have a complete map of the network topology',
+      'Routers only share routing table info with directly connected neighbors',
+      'Updates are triggered only by topology changes',
+      'Uses Dijkstra\'s SPF algorithm'
+    ],
+    ans: 1,
+    exp: 'Distance vector routers share their routing table only with directly connected neighbors. They do not have a full topology map — that is a link-state characteristic.'
+  },
+  {
+    topic: 'dv', tag: 'Distance Vector',
+    q: 'How often does RIPv1 send routing updates by default?',
+    opts: ['Every 10 seconds', 'Every 30 seconds', 'Every 60 seconds', 'Every 90 seconds'],
+    ans: 1,
+    exp: 'RIPv1 sends periodic routing updates every <strong>30 seconds</strong> to all neighbors.'
+  },
+  {
+    topic: 'dv', tag: 'Distance Vector',
+    q: 'What is "routing by rumor" in the context of distance vector protocols?',
+    opts: [
+      'Routers learn about networks from their own interfaces',
+      'Routers trust and pass on routing information received from neighbors without verifying it',
+      'Routers share false routing information to mislead attackers',
+      'Routers calculate routes independently using full topology data'
+    ],
+    ans: 1,
+    exp: '"Routing by rumor" means a router learns about remote networks from neighbors and trusts that information, then passes it on — without knowing the full topology.'
+  },
+  {
+    topic: 'dv', tag: 'Distance Vector',
+    q: 'What loop-prevention mechanism limits the maximum hop count in RIP?',
+    opts: ['Split horizon', 'Poison reverse', 'Maximum hop count of 15', 'Hold-down timer'],
+    ans: 2,
+    exp: 'RIP defines infinity as <strong>16 hops</strong>. Any destination requiring 16 or more hops is considered unreachable, stopping routing loops from propagating indefinitely.'
+  },
+  {
+    topic: 'dv', tag: 'Distance Vector',
+    q: 'Split horizon prevents routing loops by:',
+    opts: [
+      'Advertising a route back out the same interface it was learned from with a metric of 16',
+      'Not advertising a route back out the interface it was learned from',
+      'Sending updates every 30 seconds',
+      'Increasing the hop count to infinity immediately'
+    ],
+    ans: 1,
+    exp: 'Split horizon: a router does not advertise a route back out the same interface it was learned from. This prevents two-router loops.'
+  },
+  {
+    topic: 'dv', tag: 'Distance Vector',
+    q: 'Which of the following is NOT a distance vector routing protocol?',
+    opts: ['RIP', 'IGRP', 'OSPF', 'EIGRP'],
+    ans: 2,
+    exp: 'OSPF is a <strong>link-state</strong> protocol. RIP, IGRP, and EIGRP are all distance vector (or hybrid in EIGRP\'s case) protocols.'
+  },
+  {
+    topic: 'dv', tag: 'Distance Vector',
+    q: 'What does the "hold-down timer" do in distance vector routing?',
+    opts: [
+      'Prevents routers from accepting updates about a failed route for a period of time',
+      'Slows down routing updates to reduce bandwidth',
+      'Increases the metric of all routes by 1',
+      'Resets the routing table after a failure'
+    ],
+    ans: 0,
+    exp: 'The hold-down timer prevents a router from accepting new (possibly incorrect) routing information about a failed route for a defined period, giving the network time to stabilize.'
+  },
+  {
+    topic: 'dv', tag: 'Distance Vector',
+    q: 'In a distance vector network, "count to infinity" occurs when:',
+    opts: [
+      'A router has too many routes in its table',
+      'Routers keep incrementing a route\'s metric after a failure until it reaches the maximum',
+      'A router sends updates too frequently',
+      'The network has more than 255 routers'
+    ],
+    ans: 1,
+    exp: 'Count to infinity: after a link fails, routers keep advertising an incrementally increasing metric to each other (1→2→3…) until it hits the max (16 for RIP), wasting time and causing instability.'
+  },
+  {
+    topic: 'dv', tag: 'Distance Vector',
+    q: 'Which two components define a distance vector route? (Choose the BEST answer)',
+    opts: [
+      'IP address and MAC address',
+      'Distance (metric) and vector (direction/next-hop)',
+      'Bandwidth and delay',
+      'Subnet mask and interface'
+    ],
+    ans: 1,
+    exp: 'Distance vector = <strong>Distance</strong> (how far — metric/hop count) + <strong>Vector</strong> (which direction — next-hop router or interface).'
+  },
+
+  // ── RIPv1 (Q33–Q40) ─────────────────────────────────────────────────────
+  {
+    topic: 'rip', tag: 'RIPv1',
+    q: 'Which command enables RIPv1 on a router?',
+    opts: [
+      '<code>router rip version 1</code>',
+      '<code>enable rip</code>',
+      '<code>router rip</code> then <code>network [address]</code>',
+      '<code>ip rip enable</code>'
+    ],
+    ans: 2,
+    exp: 'You enable RIP with <code>router rip</code> in global config, then advertise networks with <code>network [classful-network]</code>. RIPv1 is the default version.'
+  },
+  {
+    topic: 'rip', tag: 'RIPv1',
+    q: 'RIPv1 sends updates as:',
+    opts: ['Unicast to each neighbor', 'Multicast to 224.0.0.9', 'Broadcast to 255.255.255.255', 'Anycast'],
+    ans: 2,
+    exp: 'RIPv1 uses <strong>broadcasts (255.255.255.255)</strong> to send updates. RIPv2 switched to multicast 224.0.0.9.'
+  },
+  {
+    topic: 'rip', tag: 'RIPv1',
+    q: 'What is the maximum hop count allowed by RIP before a destination is considered unreachable?',
+    opts: ['10', '15', '16', '255'],
+    ans: 1,
+    exp: 'RIP\'s maximum hop count is <strong>15</strong>. A hop count of 16 means the destination is unreachable (infinity).'
+  },
+  {
+    topic: 'rip', tag: 'RIPv1',
+    q: 'RIPv1 does NOT support which of the following?',
+    opts: [
+      'Periodic updates',
+      'VLSM and classless routing',
+      'Split horizon',
+      'Hop count as a metric'
+    ],
+    ans: 1,
+    exp: 'RIPv1 is a classful protocol — it does NOT include subnet mask information in updates, making it incompatible with VLSM. RIPv2 added VLSM support.'
+  },
+  {
+    topic: 'rip', tag: 'RIPv1',
+    q: 'Which command verifies RIP is running and shows the networks being advertised?',
+    opts: [
+      '<code>show rip neighbors</code>',
+      '<code>show ip protocols</code>',
+      '<code>debug rip events</code>',
+      '<code>show rip database</code>'
+    ],
+    ans: 1,
+    exp: '<code>show ip protocols</code> displays active routing protocols, their timers, networks being advertised, and neighbors.'
+  },
+  {
+    topic: 'rip', tag: 'RIPv1',
+    q: 'In RIP, the <code>network</code> command under <code>router rip</code> uses:',
+    opts: [
+      'The exact subnet address with mask',
+      'The classful network address (no mask)',
+      'The next-hop IP address',
+      'The interface name'
+    ],
+    ans: 1,
+    exp: 'RIPv1\'s <code>network</code> command takes the <strong>classful network address</strong> (Class A/B/C) without a subnet mask. Example: <code>network 192.168.10.0</code>'
+  },
+  {
+    topic: 'rip', tag: 'RIPv1',
+    q: 'What timer determines how long RIP waits before declaring a route unreachable after not receiving an update?',
+    opts: ['Update timer (30s)', 'Invalid/Expiration timer (180s)', 'Flush timer (240s)', 'Hold-down timer (180s)'],
+    ans: 1,
+    exp: 'The <strong>invalid timer (180s)</strong> — if no update is received for a route within 180 seconds, RIP marks it as unreachable (metric 16). The flush timer (240s) then removes it from the table.'
+  },
+  {
+    topic: 'rip', tag: 'RIPv1',
+    q: 'Which command disables RIP automatic summarization?',
+    opts: [
+      '<code>no auto-summary</code>',
+      '<code>no ip summary-address</code>',
+      '<code>no rip summarize</code>',
+      'RIPv1 cannot disable summarization'
+    ],
+    ans: 3,
+    exp: 'RIPv1 <strong>always summarizes at classful boundaries</strong> and cannot be configured to disable this. <code>no auto-summary</code> is a RIPv2/EIGRP command.'
+  },
+
+  // ── DHCP (Q41–Q50) ──────────────────────────────────────────────────────
+  {
+    topic: 'dhcp', tag: 'DHCP',
+    q: 'What does DHCP stand for?',
+    opts: [
+      'Dynamic Host Control Protocol',
+      'Dynamic Host Configuration Protocol',
+      'Distributed Host Configuration Protocol',
+      'Dynamic Hardware Configuration Protocol'
+    ],
+    ans: 1,
+    exp: 'DHCP = <strong>Dynamic Host Configuration Protocol</strong>. It automatically assigns IP addresses, subnet masks, default gateways, and DNS servers to hosts.'
+  },
+  {
+    topic: 'dhcp', tag: 'DHCP',
+    q: 'What are the four steps of the DHCP process in order?',
+    opts: [
+      'Offer → Discover → Request → Acknowledge',
+      'Discover → Offer → Request → Acknowledge',
+      'Request → Discover → Offer → Acknowledge',
+      'Discover → Request → Offer → Acknowledge'
+    ],
+    ans: 1,
+    exp: 'DORA: <strong>D</strong>iscover → <strong>O</strong>ffer → <strong>R</strong>equest → <strong>A</strong>cknowledge.'
+  },
+  {
+    topic: 'dhcp', tag: 'DHCP',
+    q: 'Which command excludes IP addresses from the DHCP pool so they are not assigned to clients?',
+    opts: [
+      '<code>ip dhcp exclude [address]</code>',
+      '<code>ip dhcp excluded-address [low] [high]</code>',
+      '<code>no dhcp pool [address]</code>',
+      '<code>dhcp exclude [address]</code>'
+    ],
+    ans: 1,
+    exp: '<code>ip dhcp excluded-address [low-ip] [high-ip]</code> reserves a range of addresses (e.g., for routers and servers) so DHCP does not assign them to clients.'
+  },
+  {
+    topic: 'dhcp', tag: 'DHCP',
+    q: 'Which command defines the default gateway given to DHCP clients?',
+    opts: [
+      '<code>gateway [ip]</code>',
+      '<code>ip default-gateway [ip]</code>',
+      '<code>default-router [ip]</code>',
+      '<code>ip route 0.0.0.0 0.0.0.0 [ip]</code>'
+    ],
+    ans: 2,
+    exp: 'Inside a DHCP pool configuration, <code>default-router [ip]</code> sets the default gateway that is handed out to DHCP clients.'
+  },
+  {
+    topic: 'dhcp', tag: 'DHCP',
+    q: 'What is the purpose of a DHCP relay agent (<code>ip helper-address</code>)?',
+    opts: [
+      'To assign static IP addresses',
+      'To forward DHCP broadcast messages to a DHCP server on a different subnet',
+      'To block DHCP traffic from untrusted ports',
+      'To back up the DHCP server'
+    ],
+    ans: 1,
+    exp: 'DHCP clients use broadcasts that do not cross router boundaries. <code>ip helper-address [server-ip]</code> on the router interface converts those broadcasts to unicast and forwards them to the DHCP server.'
+  },
+  {
+    topic: 'dhcp', tag: 'DHCP',
+    q: 'Which command displays the current DHCP address bindings on a Cisco router?',
+    opts: [
+      '<code>show ip dhcp pool</code>',
+      '<code>show dhcp lease</code>',
+      '<code>show ip dhcp binding</code>',
+      '<code>show ip arp</code>'
+    ],
+    ans: 2,
+    exp: '<code>show ip dhcp binding</code> lists all IP addresses currently leased by the DHCP server, including the client MAC address and lease expiration.'
+  },
+  {
+    topic: 'dhcp', tag: 'DHCP',
+    q: 'A host is configured as a DHCP client but receives the address 169.254.x.x. What does this indicate?',
+    opts: [
+      'The DHCP server assigned a reserved address',
+      'The host could not reach a DHCP server and used APIPA',
+      'The host is using a static IP',
+      'The DHCP pool is full'
+    ],
+    ans: 1,
+    exp: '169.254.0.0/16 is the APIPA (Automatic Private IP Addressing) range. A host uses it when it cannot contact a DHCP server. This confirms a DHCP reachability problem.'
+  },
+  {
+    topic: 'dhcp', tag: 'DHCP',
+    q: 'Which command sets the DNS server address in a Cisco DHCP pool?',
+    opts: [
+      '<code>dns [ip]</code>',
+      '<code>ip dns-server [ip]</code>',
+      '<code>dns-server [ip]</code>',
+      '<code>name-server [ip]</code>'
+    ],
+    ans: 2,
+    exp: 'Inside a DHCP pool config, <code>dns-server [ip]</code> specifies the DNS server address distributed to clients.'
+  },
+  {
+    topic: 'dhcp', tag: 'DHCP',
+    q: 'What is the correct sequence of commands to create a DHCP pool named "LAN1" for network 192.168.1.0/24?',
+    opts: [
+      '<code>ip dhcp pool LAN1</code> → <code>network 192.168.1.0 255.255.255.0</code>',
+      '<code>dhcp pool create LAN1</code> → <code>subnet 192.168.1.0/24</code>',
+      '<code>ip pool LAN1 192.168.1.0 255.255.255.0</code>',
+      '<code>service dhcp LAN1</code> → <code>network 192.168.1.0</code>'
+    ],
+    ans: 0,
+    exp: 'First <code>ip dhcp pool [name]</code> enters pool config mode, then <code>network [address] [mask]</code> defines the address range for the pool.'
+  },
+  {
+    topic: 'dhcp', tag: 'DHCP',
+    q: 'Which command disables the Cisco IOS DHCP server service entirely?',
+    opts: [
+      '<code>no ip dhcp pool</code>',
+      '<code>no service dhcp</code>',
+      '<code>shutdown dhcp</code>',
+      '<code>ip dhcp disable</code>'
+    ],
+    ans: 1,
+    exp: '<code>no service dhcp</code> completely disables the Cisco IOS DHCP server. Use <code>service dhcp</code> to re-enable it.'
+  }
+
+];
+
+// ── State ────────────────────────────────────────────────────────────────
+let answered = 0;
+let score = 0;
+const tagScore = { static:0, vlsm:0, dv:0, rip:0, dhcp:0 };
+const tagTotal = { static:12, vlsm:10, dv:10, rip:8, dhcp:10 };
+
+// ── Build Exam ───────────────────────────────────────────────────────────
+function buildExam() {
+  answered = 0; score = 0;
+  Object.keys(tagScore).forEach(k => tagScore[k] = 0);
+  document.getElementById('prog-txt').textContent = '0 / 50 answered';
+  document.getElementById('score-live').textContent = 'Score: 0 / 50';
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('result-box').classList.remove('show');
+
+  const container = document.getElementById('exam-container');
+  container.innerHTML = '';
+
+  const sections = [
+    { id:'static', label:'Part 1 — Static Routing', qs: questions.filter(q=>q.topic==='static') },
+    { id:'vlsm',   label:'Part 2 — VLSM',            qs: questions.filter(q=>q.topic==='vlsm') },
+    { id:'dv',     label:'Part 3 — Distance Vector',  qs: questions.filter(q=>q.topic==='dv') },
+    { id:'rip',    label:'Part 4 — RIPv1',            qs: questions.filter(q=>q.topic==='rip') },
+    { id:'dhcp',   label:'Part 5 — DHCP',             qs: questions.filter(q=>q.topic==='dhcp') },
+  ];
+
+  let globalIdx = 0;
+
+  sections.forEach(sec => {
+    const div = document.createElement('div');
+    div.className = 'divider';
+    div.innerHTML = `<div class="divider-line"></div><div class="divider-label">${sec.label}</div><div class="divider-line"></div>`;
+    container.appendChild(div);
+
+    sec.qs.forEach(q => {
+      globalIdx++;
+      const card = document.createElement('div');
+      card.className = 'qcard';
+      card.id = 'q' + globalIdx;
+
+      const tagClass = 'tag-' + q.topic;
+      let optsHTML = q.opts.map((o, i) =>
+        `<button class="qopt" onclick="answer(${globalIdx}, ${i}, ${q.ans})">${String.fromCharCode(65+i)}. ${o}</button>`
+      ).join('');
+
+      card.innerHTML = `
+        <div class="qnum">Question ${globalIdx} <span class="qtag ${tagClass}">${q.tag}</span></div>
+        <div class="qtext">${q.q}</div>
+        <div class="qopts" id="opts-${globalIdx}">${optsHTML}</div>
+        <div class="qfeedback" id="fb-${globalIdx}">💡 ${q.exp}</div>
+      `;
+      container.appendChild(card);
+    });
+  });
+}
+
+// ── Answer Handler ───────────────────────────────────────────────────────
+function answer(qIdx, chosen, correct) {
+  const optsEl = document.getElementById('opts-' + qIdx);
+  const fbEl   = document.getElementById('fb-' + qIdx);
+  const card   = document.getElementById('q' + qIdx);
+
+  // Disable all options
+  optsEl.querySelectorAll('.qopt').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === correct) btn.classList.add('correct');
+    if (i === chosen && chosen !== correct) btn.classList.add('wrong');
+  });
+
+  fbEl.classList.add('show');
+  answered++;
+
+  const topic = questions[qIdx - 1].topic;
+  if (chosen === correct) {
+    score++;
+    tagScore[topic]++;
+    card.classList.add('done-correct');
+  } else {
+    card.classList.add('done-wrong');
+  }
+
+  // Update progress
+  const pct = (answered / 50) * 100;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-txt').textContent = `${answered} / 50 answered`;
+  document.getElementById('score-live').textContent = `Score: ${score} / 50`;
+
+  if (answered === 50) showResult();
+}
+
+// ── Show Result ──────────────────────────────────────────────────────────
+function showResult() {
+  const box = document.getElementById('result-box');
+  box.classList.add('show');
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  const pct = Math.round((score / 50) * 100);
+  document.getElementById('res-score').textContent = score + '/50';
+
+  let grade, color;
+  if (pct >= 95)      { grade = '🏆 Excellent — Outstanding Performance!'; color = 'var(--green2)'; }
+  else if (pct >= 85) { grade = '✅ Very Good — Strong Understanding!';     color = 'var(--blue2)'; }
+  else if (pct >= 75) { grade = '👍 Good — Keep Reviewing!';                color = 'var(--orange2)'; }
+  else if (pct >= 60) { grade = '⚠️ Fair — More Practice Needed.';          color = '#ffa657'; }
+  else                { grade = '❌ Needs Improvement — Review the Lesson.'; color = 'var(--red)'; }
+
+  const gradeEl = document.getElementById('res-grade');
+  gradeEl.textContent = grade;
+  gradeEl.style.color = color;
+
+  const labels = { static:'Static Routing', vlsm:'VLSM', dv:'Distance Vector', rip:'RIPv1', dhcp:'DHCP' };
+  const bd = document.getElementById('res-breakdown');
+  bd.innerHTML = Object.keys(tagScore).map(k =>
+    `<div class="bd-pill">${labels[k]}: <strong>${tagScore[k]}/${tagTotal[k]}</strong></div>`
+  ).join('');
+}
+
+// ── Reset ────────────────────────────────────────────────────────────────
+function resetExam() {
+  buildExam();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Init
+buildExam();
+</script>
+</body>
+</html>
